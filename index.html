@@ -1,599 +1,189 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Life Scrapbook</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#28231f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Life Scrapbook">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
-:root{
-  --bg:#f7f3ec;--paper:#fffdf8;--ink:#26231f;--muted:#746f68;--line:#d8d0c5;
-  --accent:#8f6f5b;--accent2:#c7a98f;--shadow:0 10px 28px rgba(43,34,25,.10);
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
-button,input,textarea,select{font:inherit}
-button{cursor:pointer}
-.topbar{position:sticky;top:0;z-index:20;background:rgba(247,243,236,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
-.top-inner{max-width:1360px;margin:auto;padding:14px 18px;display:flex;gap:16px;align-items:center;justify-content:space-between}
-.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px}
-.brand-mark{width:34px;height:34px;border-radius:10px;background:var(--ink);color:white;display:grid;place-items:center;font-family:Georgia,serif}
-nav{display:flex;gap:6px;flex-wrap:wrap}
-nav button,.ghost{border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:8px 11px;color:var(--ink)}
-nav button.active{background:var(--ink);color:white;border-color:var(--ink)}
-.primary{border:0;background:var(--ink);color:white;border-radius:10px;padding:10px 14px}
-.secondary{border:1px solid var(--line);background:#efe6da;color:var(--ink);border-radius:10px;padding:10px 14px}
-.danger{border:1px solid #c68484;background:#fff7f7;color:#8e3333;border-radius:10px;padding:8px 11px}
-main{max-width:1360px;margin:0 auto;padding:22px 18px 80px}
-.view{display:none}.view.active{display:block}
-h1,h2,h3,h4{margin:0 0 10px}
-.small{font-size:12px;color:var(--muted)}
-.muted{color:var(--muted)}
-.grid2{display:grid;grid-template-columns:1.08fr .92fr;gap:18px}
-.gridScrap{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:18px;align-items:start}
-.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:16px}
-.capture textarea{width:100%;min-height:150px;resize:vertical;border:1px solid var(--line);border-radius:12px;padding:12px;background:white}
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.field{display:flex;flex-direction:column;gap:5px;min-width:160px;flex:1}
-.field label{font-size:12px;color:var(--muted)}
-.field input,.field select,.field textarea,.toolbar input,.toolbar select{width:100%;border:1px solid var(--line);background:white;border-radius:10px;padding:9px}
-.file-drop{border:1.5px dashed var(--accent2);border-radius:12px;padding:14px;text-align:center;background:#fcf8f1;margin-top:10px}
-.preview-strip{display:flex;gap:8px;overflow-x:auto;margin-top:10px}
-.preview-strip img{width:90px;height:90px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
-.statbar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.stat{padding:14px;background:white;border:1px solid var(--line);border-radius:12px}
-.stat b{display:block;font-size:24px}
-.entry-list{display:grid;gap:10px}
-.entry{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px}
-.entry-head{display:flex;justify-content:space-between;gap:10px}
-.entry-title{font-weight:750}
-.entry-media{display:flex;gap:7px;overflow-x:auto;margin-top:10px}
-.entry-media img{height:120px;min-width:120px;max-width:180px;object-fit:cover;border-radius:10px}
-.tag{display:inline-block;background:#eee7dd;border-radius:999px;padding:3px 8px;margin:3px 4px 0 0;font-size:12px}
-.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
-.event-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px}
-.event-card{background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
-.event-cover{height:180px;background:#e8dfd3;display:grid;grid-template-columns:repeat(2,1fr);gap:2px}
-.event-cover img{width:100%;height:100%;object-fit:cover;min-height:0}
-.event-body{padding:14px}
-.event-meta{font-size:12px;color:var(--muted);margin-bottom:8px}
-.notice{padding:10px 12px;border-radius:10px;background:#f0ece5;border:1px solid var(--line);font-size:13px;margin:10px 0}
-.empty{padding:36px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px}
-
-.scrap-controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
-.scrap-controls select,.scrap-controls input{border:1px solid var(--line);border-radius:10px;padding:9px;background:white}
-.page-stack{display:grid;gap:18px}
-.letter-page{position:relative;width:100%;max-width:850px;margin:0 auto;background:white;border:1px solid #d6d0c7;border-radius:10px;box-shadow:0 14px 34px rgba(0,0,0,.14);aspect-ratio:8.5/11;overflow:hidden}
-.page-inner{position:absolute;inset:0;padding:.38in .45in .42in .45in}
-.page-title{font-family:Georgia,serif;font-size:30px;line-height:1.05;margin:0 0 4px;outline:none}
-.page-subtitle{font-family:Georgia,serif;font-style:italic;color:#6e665f;margin-bottom:16px;outline:none}
-.paper-cream{background:#fffdf9}.paper-tan{background:#f2e8d9}.paper-soft{background:#fbfaf7}.paper-gray{background:#f3f3f1}.paper-blue{background:#eef4f6}.paper-peach{background:#f8efe8}.paper-green{background:#eef3ea}
-.editable{outline:none}.editable:focus{box-shadow:0 0 0 2px rgba(143,111,91,.18);border-radius:6px}
-.page-rule{background-image:linear-gradient(to bottom, transparent 31px, rgba(80,96,84,.22) 32px);background-size:100% 32px}
-.lines-area{min-height:8.15in;padding-top:64px;position:relative}
-.lines-area .journal-write{position:absolute;left:0;right:0;top:58px;bottom:0;padding:4px;white-space:pre-wrap;line-height:32px;font-size:18px;outline:none}
-.top-date-rail{display:flex;justify-content:space-between;align-items:end;gap:14px;margin-bottom:6px}
-.date-strip{font-size:14px;color:#7a7a67;letter-spacing:.03em}.date-strip span{margin-right:9px}
-.watercolor-leaf:before{content:'';position:absolute;left:.35in;bottom:.42in;width:170px;height:90px;background:radial-gradient(circle at 18% 60%,rgba(132,155,120,.55),transparent 34%),radial-gradient(circle at 45% 30%,rgba(150,176,138,.42),transparent 32%),radial-gradient(circle at 72% 58%,rgba(140,165,128,.45),transparent 30%),linear-gradient(20deg,transparent 44%,rgba(171,143,118,.62) 45%,rgba(171,143,118,.62) 49%,transparent 50%);transform:rotate(-8deg);opacity:.7;pointer-events:none}
-.notebook-page{background:#f8f0d8}
-.notebook-page:before{content:'';position:absolute;left:1.05in;top:.72in;bottom:.55in;width:2px;background:#df7a72}
-.notebook-page:after{content:'';position:absolute;left:.32in;top:.52in;bottom:.5in;width:14px;background:radial-gradient(circle, rgba(0,0,0,.35) 0 7px, transparent 8px) center top / 14px 46px repeat-y;opacity:.55}
-.heart-doodles:before{content:'♥   ♥    ♥       ♥   ♥';position:absolute;left:1.1in;top:.36in;color:rgba(145,117,117,.35);font-size:18px;letter-spacing:18px}
-.moody-tree{background:linear-gradient(to bottom, rgba(255,255,255,.94), rgba(245,245,245,.96))}
-.moody-tree:before{content:'';position:absolute;inset:0;background:linear-gradient(to bottom, transparent 30px, rgba(100,100,100,.22) 31px);background-size:100% 31px;opacity:.55}
-.moody-tree .tree-art{position:absolute;inset:0;pointer-events:none;opacity:.18}
-.moody-tree .tree-art:before{content:'';position:absolute;left:-35px;top:-10px;width:430px;height:390px;background:radial-gradient(circle at 12% 12%, rgba(100,100,100,.55), transparent 11%), linear-gradient(65deg, transparent 44%, rgba(70,70,70,.7) 45%, rgba(70,70,70,.7) 49%, transparent 50%), linear-gradient(12deg, transparent 40%, rgba(90,90,90,.75) 41%, rgba(90,90,90,.75) 45%, transparent 46%), linear-gradient(-12deg, transparent 54%, rgba(90,90,90,.6) 55%, rgba(90,90,90,.6) 59%, transparent 60%)}
-.moody-tree .tree-art:after{content:'🕊  🕊';position:absolute;right:48px;top:64px;font-size:24px;opacity:.55}
-.corner-stars:before,.corner-stars:after{content:'✦ ✧ ✦';position:absolute;font-size:14px;color:#9d927d;opacity:.65}.corner-stars:before{left:16px;top:14px}.corner-stars:after{right:16px;top:14px}
-.paper-accent{position:absolute;pointer-events:none;opacity:.18}.paper-accent.star{right:20px;bottom:20px;font-size:34px}.paper-accent.tape{right:18px;top:14px;width:84px;height:24px;background:rgba(231,205,152,.68);transform:rotate(7deg);border-radius:2px}
-
-.storyboard-page .storyboard-head{display:flex;justify-content:space-between;font-size:11px;color:#5d5650;margin-bottom:10px;gap:12px;flex-wrap:wrap}
-.storyboard-page .storyboard-head input{border:0;border-bottom:1px solid #b9b2aa;background:transparent;min-width:90px;padding:2px 3px}
-.storyboard-page .sb-row{display:grid;grid-template-columns:1fr 1.25fr;gap:12px;align-items:stretch;margin-bottom:16px}
-.storyboard-page .sb-notes{border:1px solid #c7c0b7;padding:8px;border-radius:4px;background:linear-gradient(to bottom, transparent 17px, rgba(70,70,70,.15) 18px);background-size:100% 18px;min-height:178px}
-.storyboard-page .sb-frame{border:2px solid #515151;min-height:178px;position:relative;background:#fff}
-.storyboard-page .sb-frame img{width:100%;height:100%;object-fit:cover}
-.storyboard-page .sb-mini{font-size:10px;color:#595350;display:flex;justify-content:space-between;margin-bottom:4px}
-.storyboard-page .sb-caption{outline:none;min-height:150px;white-space:pre-wrap;line-height:18px;font-size:12px}
-
-.photo-layout .hero-row{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;margin-bottom:12px}
-.photo-layout .side-col{display:grid;gap:12px}
-.photo-box{background:#ebe7e0;border:1px solid #cfc8be;border-radius:8px;overflow:hidden;display:grid;place-items:center;color:#857969;font-weight:600}
-.photo-box img{width:100%;height:100%;object-fit:cover}
-.photo-layout .hero{min-height:3.3in}.photo-layout .small{min-height:1.55in}.wide-note{margin-top:12px;border:1px solid #cfc8be;border-radius:8px;padding:12px;min-height:1.45in;background:white}
-.collage-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}
-.collage-grid .leftTall{min-height:5.3in}
-.collage-grid .rightStack{display:grid;gap:10px}
-.collage-grid .rightStack .photo-box{min-height:1.28in}
-.magazine-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:12px}
-.magazine-grid .feature{min-height:4.2in}
-.magazine-grid .column-note{border:1px solid #cfc8be;border-radius:8px;background:rgba(255,255,255,.8);padding:10px;min-height:4.2in;white-space:pre-wrap}
-.trip-grid{display:grid;grid-template-columns:1fr .95fr;gap:12px}
-.trip-card{border:1px solid #d0c9bf;border-radius:10px;background:rgba(255,255,255,.78);padding:10px}
-.trip-card .label{font-size:11px;font-weight:700;color:#6e655c;margin-bottom:6px}
-.trip-card .write{min-height:42px;outline:none;white-space:pre-wrap}
-.trip-card.tall .write{min-height:132px}
-.pill-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
-.pill{border:1px solid #d5ccbe;border-radius:999px;padding:6px 10px;background:white;font-size:12px}
-
-.grid-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.panel{border:1px solid #d0c9bf;border-radius:10px;background:rgba(255,255,255,.8);padding:10px}
-.panel .panel-label{font-size:12px;font-weight:700;color:#6e655c;margin-bottom:8px}.panel .panel-write{min-height:72px;outline:none;white-space:pre-wrap}
-.panel.tall .panel-write{min-height:160px}
-.info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.info-cell{border:1px solid #d0c9bf;border-radius:8px;background:rgba(255,255,255,.72);padding:8px}.info-cell .label{font-size:11px;font-weight:700;color:#6e655c;margin-bottom:4px}.info-cell .write{min-height:18px;outline:none}
-.mini-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.mini-gallery .photo-box{min-height:1.2in}
-.big-note{border:1px solid #d0c9bf;border-radius:10px;background:white;padding:12px;min-height:2.25in;white-space:pre-wrap}
-
-.prompt-block{padding:10px 12px;margin:14px 0;border:1px solid #cfc7bb;border-radius:8px;background:rgba(255,255,255,.6)}
-.prompt-question{font-size:13px;font-weight:700;margin-bottom:8px;color:#5d544e}.prompt-answer{min-height:70px;white-space:pre-wrap;outline:none}
-.shadow-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.shadow-grid .mini-box{border:1px solid #cfc7bb;border-radius:8px;background:rgba(255,255,255,.6);padding:10px;min-height:140px}.mini-label{font-size:12px;font-weight:700;color:#6b6259;margin-bottom:8px}.mini-write{white-space:pre-wrap;outline:none;min-height:92px}
-
-.camp-table,.hike-grid{display:grid;gap:8px;margin-top:12px}.camp-table{grid-template-columns:repeat(2,1fr)}.hike-grid{grid-template-columns:repeat(2,1fr)}
-.cell{border:1px solid #cfc7bb;border-radius:8px;background:rgba(255,255,255,.68);padding:8px 10px;min-height:50px}.cell-label{font-size:11px;font-weight:700;color:#6e655c;margin-bottom:4px}.cell-value{min-height:20px;outline:none}
-.notes-box{border:1px solid #ccc3b7;border-radius:8px;padding:10px;min-height:2in;background:rgba(255,255,255,.68);margin-top:12px;white-space:pre-wrap}
-
-.grid-month{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}.grid-month .box{min-height:1.02in;border:1px solid #d1c8bc;border-radius:8px;background:rgba(255,255,255,.74);padding:6px}.grid-month .dayname{font-size:11px;font-weight:700;color:#74695f;text-align:center}
-.daily-grid{display:grid;grid-template-columns:1fr .85fr;gap:12px;margin-top:12px}.daily-col{display:grid;gap:12px}.mini-panel{border:1px solid #d1c8bc;border-radius:10px;padding:10px;background:rgba(255,255,255,.74);min-height:1.12in}.planner-title{font-size:28px;font-family:Georgia,serif}
-
-.template-category{margin-bottom:16px}.template-category h4{margin:0 0 8px;font-size:14px;color:#6d6259;text-transform:uppercase;letter-spacing:.06em}
-.template-gallery{display:grid;grid-template-columns:1fr;gap:10px;max-height:calc(100vh - 310px);overflow:auto;padding-right:4px}
-.template-card{display:grid;grid-template-columns:94px 1fr;gap:10px;align-items:center;padding:9px;border:1px solid var(--line);border-radius:12px;background:white;cursor:pointer}
-.template-card.active{border-color:#7e6350;background:#f7f0e8;box-shadow:inset 0 0 0 1px #7e6350}
-.template-thumb{height:72px;border:1px solid #d6cec2;border-radius:8px;background:#fbfaf7;position:relative;overflow:hidden}
-.template-thumb.storyboard:before{content:'';position:absolute;inset:8px;background:linear-gradient(to bottom, transparent 0 18%, #dad4ca 18% 20%, transparent 20% 46%, #dad4ca 46% 48%, transparent 48% 74%, #dad4ca 74% 76%, transparent 76%)}.template-thumb.storyboard:after{content:'';position:absolute;right:8px;top:8px;bottom:8px;width:52%;border:2px solid #666}
-.template-thumb.lined:before{content:'';position:absolute;inset:0;background:linear-gradient(to bottom, transparent 13px, #d6dddf 14px);background-size:100% 15px}.template-thumb.lined:after{content:'';position:absolute;left:8px;bottom:8px;width:36px;height:22px;background:rgba(131,156,120,.5);border-radius:20px 18px 14px 20px;transform:rotate(-16deg)}
-.template-thumb.notebook:before{content:'';position:absolute;left:14px;top:0;bottom:0;width:2px;background:#e68a80}.template-thumb.notebook:after{content:'';position:absolute;left:2px;top:6px;bottom:6px;width:10px;background:radial-gradient(circle, rgba(0,0,0,.35) 0 4px, transparent 5px) center top/10px 20px repeat-y}
-.template-thumb.photo:before{content:'';position:absolute;left:8px;top:8px;right:38px;bottom:22px;background:#d8d8d8}.template-thumb.photo:after{content:'';position:absolute;right:8px;top:8px;width:24px;height:24px;background:#d8d8d8;box-shadow:0 28px 0 #d8d8d8, 0 56px 0 #d8d8d8}
-.template-thumb.grid:before{content:'';position:absolute;inset:8px;background:linear-gradient(90deg,#d9d0c3 1px,transparent 1px) 0 0/24px 100%, linear-gradient(#d9d0c3 1px,transparent 1px) 0 0/100% 22px}
-.template-thumb.map:before{content:'';position:absolute;left:8px;top:8px;right:8px;bottom:8px;background:radial-gradient(circle at 25% 35%, #d8d8d8 0 24%, transparent 25%),radial-gradient(circle at 72% 60%, #d8d8d8 0 20%, transparent 21%),linear-gradient(45deg,transparent 47%,#c7c1b7 48% 52%,transparent 53%),linear-gradient(-28deg,transparent 43%,#c7c1b7 44% 48%,transparent 49%)}
-.template-thumb.sports:before{content:'';position:absolute;left:8px;top:8px;right:8px;bottom:8px;background:linear-gradient(#ddd 1px,transparent 1px) 0 0/100% 18px}.template-thumb.sports:after{content:'⚽';position:absolute;right:10px;bottom:8px;font-size:22px;opacity:.6}
-.template-thumb.kid:before{content:'★';position:absolute;left:12px;top:8px;font-size:24px;color:#d8ccb8}.template-thumb.kid:after{content:'';position:absolute;left:8px;right:8px;bottom:8px;height:42px;background:#ddd;border-radius:8px}
-.template-name{font-weight:700}.template-desc{font-size:12px;color:var(--muted)}
-.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}.filter-chip{border:1px solid var(--line);border-radius:999px;background:white;padding:6px 10px;font-size:12px}.filter-chip.active{background:#26231f;color:white;border-color:#26231f}
-.scrap-help{margin-top:10px;font-size:12px;color:var(--muted)}
-.print-note{font-size:12px;color:var(--muted)}
-
-
-
-/* Formatting schemes */
-.scheme-classic .letter-page{}
-.scheme-botanical .letter-page{background:#f5f7f0!important;color:#314337}
-.scheme-botanical .page-title,.scheme-botanical .planner-title{color:#46624e}
-.scheme-botanical .mini-panel,.scheme-botanical .cell,.scheme-botanical .wide-note,.scheme-botanical .post-shell{background:rgba(255,255,255,.74)!important;border-color:#cbd7c8!important}
-.scheme-vintage .letter-page{background:#f1e2c8!important;color:#493c31}
-.scheme-vintage .page-title,.scheme-vintage .planner-title{font-family:Georgia,serif;color:#76533d}
-.scheme-vintage .mini-panel,.scheme-vintage .cell,.scheme-vintage .wide-note,.scheme-vintage .post-shell{background:rgba(255,248,235,.72)!important;border-color:#bfa98e!important}
-.scheme-modern .letter-page{background:#fff!important;color:#1d1d1d;font-family:Arial,Helvetica,sans-serif}
-.scheme-modern .page-title,.scheme-modern .planner-title{font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:.04em;font-weight:800}
-.scheme-modern .page-subtitle{font-family:Arial,Helvetica,sans-serif;font-style:normal;text-transform:uppercase;letter-spacing:.08em;font-size:11px}
-.scheme-modern .mini-panel,.scheme-modern .cell,.scheme-modern .wide-note,.scheme-modern .post-shell{border-radius:0!important;border-color:#222!important}
-.scheme-colorful .letter-page{background:linear-gradient(135deg,#fffaf2 0 30%,#f5fbff 30% 58%,#fff6fa 58% 100%)!important;color:#382e35}
-.scheme-colorful .page-title,.scheme-colorful .planner-title{color:#794e70}.scheme-colorful .paper-accent{opacity:.34}
-.scheme-moody .letter-page{background:#262a33!important;color:#f4efe8}
-.scheme-moody .page-title,.scheme-moody .planner-title,.scheme-moody .page-subtitle{color:#f4efe8}
-.scheme-moody .mini-panel,.scheme-moody .cell,.scheme-moody .wide-note,.scheme-moody .post-shell,.scheme-moody .prompt-block,.scheme-moody .mini-box,.scheme-moody .notes-box{background:#343946!important;color:#f4efe8;border-color:#606674!important}
-.scheme-moody .cell-label,.scheme-moody .mini-label,.scheme-moody .prompt-question,.scheme-moody .small,.scheme-moody .comment-time{color:#c8cbd3!important}
-.scheme-moody .comment-row{border-color:#4a4f5b!important}
-
-/* Social imports */
-.social-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}
-.social-box{background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:16px}
-.social-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px;margin:12px 0}
-.social-options label{display:flex;align-items:center;gap:7px;font-size:13px;color:#544c45}
-.social-preview{border:1px solid var(--line);border-radius:14px;background:#fff;padding:14px;min-height:140px}
-.social-preview-head{display:flex;justify-content:space-between;gap:12px;align-items:start;margin-bottom:10px}
-.platform-pill{display:inline-block;border-radius:999px;padding:4px 8px;background:#eee7dd;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
-.comment-thread{display:grid;gap:8px;margin-top:10px}
-.comment-item{border-left:3px solid #d8d0c5;padding:6px 8px;background:#faf8f4;border-radius:0 8px 8px 0}
-.comment-item.reply{margin-left:20px;border-left-color:#bcae9d}
-.comment-meta{font-size:11px;color:var(--muted);margin-bottom:3px}
-.comment-text{font-size:13px;white-space:pre-wrap}
-.social-entry-card{border:1px solid #d7cfc4;background:#fffaf4;border-radius:12px;padding:12px;margin-top:10px}
-.social-entry-card blockquote{margin:8px 0;padding:10px 12px;border-left:3px solid #bcae9d;background:#fff}
-.social-status{font-size:12px;margin-top:8px;color:var(--muted)}
-.token-note{font-size:11px;color:#6f675f;margin-top:6px}
-.social-template .post-shell{border:1px solid #d8d0c5;border-radius:14px;background:#fff;padding:14px}
-.social-template .post-author{font-weight:800;margin-bottom:2px}.social-template .post-platform{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
-.social-template .post-caption{white-space:pre-wrap;margin:12px 0;line-height:1.45}.social-template .post-thumb{width:100%;max-height:3.5in;object-fit:cover;border-radius:10px;background:#eee}
-.social-template .comments-block{margin-top:12px}.social-template .comment-row{padding:7px 0;border-bottom:1px solid #eee7de;font-size:12px}.social-template .comment-row:last-child{border-bottom:0}
-.social-template .comment-row.reply{padding-left:20px}.social-template .comment-name{font-weight:750}.social-template .comment-time{color:var(--muted);font-size:10px;margin-left:6px}
-.activity-section{margin-bottom:12px}.activity-heading{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#786e63;margin:10px 2px 7px}
-.activity-badge{display:inline-block;font-size:10px;padding:2px 6px;border-radius:999px;background:#eee7dd;color:#675d54;margin-left:5px}
-@media(max-width:980px){.social-grid{grid-template-columns:1fr}.social-options{grid-template-columns:1fr}}
-
-/* dialog */
-dialog{border:0;border-radius:16px;box-shadow:0 25px 80px rgba(0,0,0,.28);max-width:720px;width:calc(100% - 30px);padding:0}
-dialog::backdrop{background:rgba(0,0,0,.35)}
-.modal{padding:18px}.modal textarea{width:100%;min-height:180px;border:1px solid var(--line);border-radius:10px;padding:10px}
-
-@page{size:letter portrait;margin:0}
-@media(max-width:1040px){.grid2,.gridScrap{grid-template-columns:1fr}.top-inner{align-items:flex-start;flex-direction:column}.template-gallery{max-height:none}}
-@media print{.topbar,.no-print,dialog{display:none!important}body{background:white}main{padding:0;max-width:none}.view{display:none!important}#scrapView{display:block!important}.letter-page{max-width:none;width:8.5in;height:11in;aspect-ratio:auto;border:0;border-radius:0;box-shadow:none;margin:0 auto;page-break-after:always;break-after:page}.page-inner{position:absolute;inset:0;padding:.38in .45in .42in .45in}}
+:root{--bg:#f4efe7;--paper:#fffdf9;--ink:#29251f;--muted:#756e65;--line:#d9d0c4;--soft:#eee4d8;--accent:#8a6b58;--shadow:0 12px 34px rgba(50,38,28,.10)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{display:none!important}
+.top{position:sticky;top:0;z-index:30;background:rgba(244,239,231,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}.topin{max-width:1380px;margin:auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;align-items:center;gap:10px;font-weight:850;white-space:nowrap}.mark{width:36px;height:36px;border-radius:11px;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:Georgia,serif;font-size:20px}.brand small{display:block;font-weight:500;color:var(--muted);font-size:11px}
+nav{display:flex;gap:6px;flex-wrap:wrap}nav button,.ghost,.secondary{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:10px;padding:8px 11px}nav button.active{background:var(--ink);color:#fff;border-color:var(--ink)}.primary{border:0;background:var(--ink);color:#fff;border-radius:10px;padding:9px 13px}.danger{border:1px solid #c98b8b;background:#fff7f7;color:#8a3030;border-radius:10px;padding:8px 11px}
+main{max-width:1380px;margin:auto;padding:20px 16px 70px}.view{display:none}.view.active{display:block}.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}h1,h2,h3,h4{margin:0 0 9px}.muted{color:var(--muted)}.small{font-size:12px;color:var(--muted)}.grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:160px}.field label{font-size:12px;color:var(--muted)}input,textarea,select{border:1px solid var(--line);border-radius:10px;background:#fff;padding:9px;color:var(--ink)}textarea{resize:vertical}.capture textarea{width:100%;min-height:150px}.capture input{width:100%}.drop{border:1.5px dashed #bda994;background:#fcf7ef;border-radius:12px;padding:14px;margin-top:10px;text-align:center}.previewstrip{display:flex;gap:8px;overflow:auto;margin-top:10px}.previewstrip img{width:90px;height:90px;border-radius:9px;object-fit:cover;border:1px solid var(--line)}.notice{background:#f1ebe3;border:1px solid var(--line);border-radius:11px;padding:10px 12px;font-size:13px;margin:10px 0}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}.stat b{display:block;font-size:24px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:13px}.toolbar input{flex:1;min-width:220px}.entrylist{display:grid;gap:10px}.entry{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px}.entryhead{display:flex;justify-content:space-between;gap:12px}.entrytitle{font-weight:800}.tag{display:inline-block;background:#eee6dc;border-radius:999px;padding:3px 8px;margin:4px 4px 0 0;font-size:12px}.media{display:flex;gap:8px;overflow:auto;margin-top:10px}.media img{height:130px;min-width:120px;max-width:190px;object-fit:cover;border-radius:9px}.socialcard{margin-top:10px;border:1px solid #d5cabc;border-radius:12px;background:#fffaf4;padding:12px}.comments{display:grid;gap:6px;margin-top:10px}.comment{border-left:3px solid #d5cabc;padding:5px 8px;background:#faf7f2;border-radius:0 8px 8px 0;font-size:13px}.comment.reply{margin-left:22px;border-left-color:#ab907a}.commentmeta{font-size:11px;color:var(--muted);margin-bottom:2px}
+.events{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px}.event{background:var(--paper);border:1px solid var(--line);border-radius:15px;overflow:hidden;box-shadow:var(--shadow)}.eventcover{height:175px;background:#e9dfd4;display:grid;grid-template-columns:repeat(2,1fr);gap:2px}.eventcover img{width:100%;height:100%;object-fit:cover;min-height:0}.eventbody{padding:13px}.eventmeta{font-size:12px;color:var(--muted);margin-bottom:8px}
+.socialgrid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}.checks{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 12px;margin:12px 0}.checks label{font-size:13px;color:#574e47;display:flex;align-items:center;gap:6px}.socialpreview{min-height:180px;border:1px solid var(--line);background:#fff;border-radius:13px;padding:13px}.pill{display:inline-block;padding:3px 8px;border-radius:999px;background:#e9dfd3;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.scraptop{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.scraptop select{min-width:145px}.scrapgrid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}.gallery{max-height:calc(100vh - 250px);overflow:auto;display:grid;gap:8px}.cathead{font-size:12px;font-weight:850;text-transform:uppercase;letter-spacing:.06em;color:#7a6e64;margin:8px 0 2px}.tcard{display:grid;grid-template-columns:88px 1fr;gap:10px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:12px;background:#fff;cursor:pointer}.tcard.active{border-color:#755a49;box-shadow:inset 0 0 0 1px #755a49;background:#faf2e9}.thumb{height:66px;border:1px solid #d8d0c5;border-radius:8px;overflow:hidden;position:relative;background:#fbfaf7}.thumb.photo:before{content:"";position:absolute;inset:8px 36px 22px 8px;background:#d8d6d3}.thumb.photo:after{content:"";position:absolute;right:8px;top:8px;width:21px;height:20px;background:#d8d6d3;box-shadow:0 24px 0 #d8d6d3,0 48px 0 #d8d6d3}.thumb.lines{background:repeating-linear-gradient(#fff,#fff 12px,#d8e0df 13px)}.thumb.grid{background:linear-gradient(90deg,#ded6ca 1px,transparent 1px) 0 0/22px 100%,linear-gradient(#ded6ca 1px,transparent 1px) 0 0/100% 18px}.thumb.story:before{content:"";position:absolute;left:7px;top:7px;right:7px;height:16px;border:1px solid #aaa}.thumb.story:after{content:"";position:absolute;left:7px;right:7px;top:29px;bottom:7px;background:linear-gradient(90deg,transparent 48%,#bbb 49% 51%,transparent 52%),linear-gradient(transparent 48%,#bbb 49% 51%,transparent 52%)}.tname{font-weight:750;font-size:13px}.tdesc{font-size:11px;color:var(--muted)}
+.pages{display:grid;gap:16px}.letter{width:100%;max-width:850px;aspect-ratio:8.5/11;background:#fff;margin:0 auto;border:1px solid #d6cec3;border-radius:8px;box-shadow:0 14px 32px rgba(0,0,0,.14);position:relative;overflow:hidden}.pin{position:absolute;inset:0;padding:.38in .44in .42in}.ptitle{font-family:Georgia,serif;font-size:31px;line-height:1.05;outline:none}.psub{font-family:Georgia,serif;font-style:italic;color:#766d64;margin:4px 0 16px;outline:none}.editable{outline:none}.editable:focus{box-shadow:0 0 0 2px rgba(138,107,88,.18);border-radius:5px}.photoBox{background:#e7e3dd;border:1px solid #cdc5bb;border-radius:7px;display:grid;place-items:center;overflow:hidden;color:#85796c;font-weight:650}.photoBox img{width:100%;height:100%;object-fit:cover}.hero{min-height:3.4in}.smallphoto{min-height:1.55in}.photoLayout{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}.sidephotos{display:grid;gap:12px}.textBox{border:1px solid #d0c7ba;border-radius:8px;padding:11px;background:rgba(255,255,255,.72);min-height:1.45in;white-space:pre-wrap}.lined{background-image:linear-gradient(to bottom,transparent 30px,rgba(86,108,98,.22) 31px);background-size:100% 31px}.linedwrite{white-space:pre-wrap;line-height:31px;font-family:Georgia,serif;font-size:17px;min-height:8.2in}.botanical:after{content:"";position:absolute;left:.2in;bottom:.25in;width:1.75in;height:.9in;background:radial-gradient(ellipse at 25% 50%,rgba(124,154,117,.45),transparent 36%),radial-gradient(ellipse at 65% 35%,rgba(148,174,138,.38),transparent 32%),linear-gradient(18deg,transparent 46%,rgba(158,132,108,.55) 47% 50%,transparent 51%);transform:rotate(-9deg);pointer-events:none}.notebook{background:#faf0d8}.notebook:before{content:"";position:absolute;left:1.05in;top:.4in;bottom:.4in;width:2px;background:#dc7f78}.notebook:after{content:"";position:absolute;left:.22in;top:.35in;bottom:.35in;width:16px;background:radial-gradient(circle,#666 0 6px,transparent 7px) center top/16px 42px repeat-y;opacity:.45}.boxes2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.box{border:1px solid #d1c8bc;border-radius:8px;background:rgba(255,255,255,.72);padding:9px;min-height:1.08in}.label{font-size:11px;color:#72675d;font-weight:800;margin-bottom:5px}.bigbox{min-height:2.15in}.month{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.day{border:1px solid #d0c7bb;border-radius:6px;min-height:.94in;padding:5px;background:rgba(255,255,255,.72)}.dayname{text-align:center;font-size:10px;font-weight:800;color:#776b61}.sbrow{display:grid;grid-template-columns:1fr 1.22fr;gap:10px;margin-bottom:12px}.sbnote{border:1px solid #bdb7ae;border-radius:4px;min-height:1.68in;padding:7px;background:repeating-linear-gradient(#fff,#fff 17px,#e4e1dd 18px)}.sbframe{border:2px solid #555;min-height:1.68in;background:#fff;overflow:hidden}.sbframe img{width:100%;height:100%;object-fit:cover}.timeline{border-left:3px solid #b59c89;margin-left:12px;padding-left:16px}.timeitem{position:relative;margin:0 0 16px}.timeitem:before{content:"";position:absolute;left:-23px;top:5px;width:11px;height:11px;border-radius:50%;background:#8a6b58}.quote{font-family:Georgia,serif;font-size:22px;line-height:1.35;border-left:4px solid #ad917a;padding:10px 14px;margin:12px 0;background:rgba(255,255,255,.62)}
+.scheme-botanical .letter{background:#f5f7ef;color:#324438}.scheme-botanical .psub,.scheme-botanical .label{color:#5e7265}.scheme-vintage .letter{background:#f0e0c4;color:#4b3b30}.scheme-vintage .box,.scheme-vintage .textBox{background:rgba(255,248,234,.72)}.scheme-modern .letter{background:#fff;color:#191919}.scheme-modern .ptitle,.scheme-modern .psub{font-family:Arial,sans-serif}.scheme-colorful .letter{background:linear-gradient(135deg,#fffaf1 0 29%,#eef8fb 29% 58%,#fff2f7 58% 100%)}.scheme-moody .letter{background:#272c35;color:#f6f0e8}.scheme-moody .psub,.scheme-moody .label{color:#c5c6c9}.scheme-moody .box,.scheme-moody .textBox,.scheme-moody .sbnote{background:rgba(255,255,255,.07);border-color:#505662}.scheme-moody .lined{background-image:linear-gradient(to bottom,transparent 30px,rgba(255,255,255,.16) 31px)}
+dialog{border:0;border-radius:16px;padding:0;max-width:720px;width:calc(100% - 30px);box-shadow:0 24px 80px rgba(0,0,0,.3)}dialog::backdrop{background:rgba(0,0,0,.35)}.modal{padding:18px}.modal textarea{width:100%;min-height:180px}
+@page{size:letter portrait;margin:0}@media(max-width:1040px){.grid2,.socialgrid,.scrapgrid{grid-template-columns:1fr}.topin{align-items:flex-start;flex-direction:column}.gallery{max-height:none}.checks{grid-template-columns:1fr}}@media(max-width:650px){main{padding:12px 10px 60px}.letter{border-radius:4px}.pin{padding:.25in .28in}.ptitle{font-size:24px}.photoLayout,.boxes2{grid-template-columns:1fr}.hero{min-height:2.5in}.stats{grid-template-columns:repeat(3,1fr)}nav button{padding:7px 9px;font-size:12px}}@media print{.top,.noPrint,dialog{display:none!important}body{background:#fff}main{padding:0;max-width:none}.view{display:none!important}#scrapView{display:block!important}.letter{width:8.5in;height:11in;max-width:none;aspect-ratio:auto;border:0;border-radius:0;box-shadow:none;page-break-after:always;break-after:page;margin:0}.pages{gap:0}}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
-<header class="topbar">
-  <div class="top-inner">
-    <div class="brand"><div class="brand-mark">L</div><div>Life Scrapbook<div class="small">throw it in now · make it pretty later</div></div></div>
-    <nav>
-      <button class="active" data-view="captureView">Quick Add</button>
-      <button data-view="inboxView">Inbox</button>
-      <button data-view="eventsView">Events</button>
-      <button data-view="scrapView">Scrapbook</button>
-      <button data-view="socialView">Social Import</button>
-      <button data-view="importView">Import / Backup</button>
-    </nav>
-  </div>
-</header>
+<header class="top"><div class="topin"><div class="brand"><div class="mark">L</div><div>Life Scrapbook<small>dump it in now · make it pretty later</small></div></div><nav>
+<button class="active" data-view="captureView">Quick Add</button><button data-view="inboxView">Inbox</button><button data-view="eventsView">Events</button><button data-view="scrapView">Scrapbook</button><button data-view="socialView">Social Import</button><button data-view="importView">Import / Backup</button><button id="installApp" class="ghost hidden">Install App</button>
+</nav></div></header>
 <main>
-<section id="captureView" class="view active">
-  <div class="grid2">
-    <div class="card capture">
-      <h2>Throw something in</h2>
-      <p class="muted">A sentence, a whole story, screenshots, photos, receipts, random memories — organize it later.</p>
-      <textarea id="captureText" placeholder="What happened? Paste anything here..."></textarea>
-      <div class="row" style="margin-top:10px">
-        <div class="field"><label>Title (optional)</label><input id="captureTitle" placeholder="Leave blank if you don't care yet"></div>
-        <div class="field"><label>Date / time</label><input id="captureDate" type="datetime-local"></div>
-      </div>
-      <div class="row" style="margin-top:10px">
-        <div class="field"><label>Location / trip</label><input id="captureLocation" placeholder="Egypt, Portland, Mom's house..."></div>
-        <div class="field"><label>Tags</label><input id="captureTags" placeholder="travel, Xander, funny, 2024"></div>
-      </div>
-      <div class="file-drop">
-        <input id="captureFiles" type="file" multiple accept="image/*,.pdf,.txt,.html,.htm" />
-        <div class="small">Photo dates are read from EXIF when available. Otherwise the file date is used.</div>
-      </div>
-      <div id="capturePreviews" class="preview-strip"></div>
-      <div class="row" style="margin-top:12px">
-        <button class="primary" id="saveEntry">Save to inbox</button>
-        <button class="ghost" id="clearCapture">Clear</button>
-      </div>
-      <div id="captureStatus" class="small" style="margin-top:8px"></div>
-    </div>
-    <div>
-      <div class="statbar">
-        <div class="stat"><span class="small">Entries</span><b id="statEntries">0</b></div>
-        <div class="stat"><span class="small">Photos</span><b id="statPhotos">0</b></div>
-        <div class="stat"><span class="small">Events</span><b id="statEvents">0</b></div>
-      </div>
-      <div class="card" style="margin-top:14px">
-        <h3>How the app organizes things</h3>
-        <p class="muted">It keeps your original dump intact, then creates suggested events using dates and locations. You can rename, merge, or change anything later.</p>
-        <div class="notice">Example: add 25 Egypt photos + a few notes with “Egypt” as the location. They will appear together as an Egypt event, sorted by the dates found in the photos.</div>
-        <button class="ghost" data-jump="eventsView">See grouped events</button>
-      </div>
-      <div class="card" style="margin-top:14px">
-        <h3>Template packs</h3>
-        <p class="muted">Templates are now grouped by activity type: everyday journaling, travel, road trips, outdoors, kids, sports, photo scrapbook pages, storyboards, and more.</p>
-      </div>
-    </div>
-  </div>
-</section>
+<section id="captureView" class="view active"><div class="grid2"><div class="card capture"><h2>Throw something in</h2><p class="muted">Writing, screenshots, photos, receipts, a social link — save it fast and organize it later.</p>
+<textarea id="captureText" placeholder="What happened?"></textarea><input id="captureSourceUrl" type="url" placeholder="Source link, Instagram/Facebook link, blog link…" style="margin-top:8px">
+<div class="row" style="margin-top:9px"><div class="field"><label>Title</label><input id="captureTitle" placeholder="Optional"></div><div class="field"><label>Date / time</label><input id="captureDate" type="datetime-local"></div></div>
+<div class="row" style="margin-top:9px"><div class="field"><label>Location / event</label><input id="captureLocation" placeholder="Egypt, camping, school game…"></div><div class="field"><label>Tags</label><input id="captureTags" placeholder="travel, kid, funny"></div></div>
+<div class="drop"><input id="captureFiles" type="file" multiple accept="image/*,.pdf,.txt,.html,.htm"><div class="small">JPEG photo date/GPS metadata is read when available. File date is the fallback.</div></div><div id="capturePreviews" class="previewstrip"></div>
+<div class="row" style="margin-top:12px"><button id="saveEntry" class="primary">Save to inbox</button><button id="clearCapture" class="ghost">Clear</button></div><div id="captureStatus" class="small" style="margin-top:7px"></div></div>
+<div><div class="stats"><div class="stat"><span class="small">Entries</span><b id="statEntries">0</b></div><div class="stat"><span class="small">Photos</span><b id="statPhotos">0</b></div><div class="stat"><span class="small">Events</span><b id="statEvents">0</b></div></div>
+<div class="card" style="margin-top:14px"><h3>Automatic event grouping</h3><p class="muted">Entries are suggested into events using dates and location/event labels. Twenty photos marked “Egypt” can become one Egypt event, then flow into a travel template.</p><button class="ghost" data-jump="eventsView">See events</button></div>
+<div class="card" style="margin-top:14px"><h3>Phone share target</h3><p class="muted">When the hosted app is installed on a supported phone, shared links/text can open directly in Quick Add. Instagram/Facebook links can then be saved or imported.</p></div></div></div></section>
 
-<section id="inboxView" class="view">
-  <div class="toolbar">
-    <input id="searchBox" placeholder="Search memories..." style="flex:1;min-width:220px">
-    <select id="sortBox"><option value="new">Newest first</option><option value="old">Oldest first</option></select>
-  </div>
-  <div id="entryList" class="entry-list"></div>
-</section>
+<section id="inboxView" class="view"><div class="toolbar"><input id="searchBox" placeholder="Search memories…"><select id="sortBox"><option value="new">Newest first</option><option value="old">Oldest first</option></select></div><div id="entryList" class="entrylist"></div></section>
+<section id="eventsView" class="view"><div class="row" style="justify-content:space-between;margin-bottom:13px"><div><h2>Suggested events</h2><div class="small">Date + location/event grouping. You can edit entries anytime.</div></div><button id="refreshEvents" class="ghost">Regroup</button></div><div id="eventGrid" class="events"></div></section>
 
-<section id="eventsView" class="view">
-  <div class="row" style="justify-content:space-between;margin-bottom:14px">
-    <div><h2>Suggested events</h2><div class="small">Grouped from date + location. Location matches can span multiple days.</div></div>
-    <button class="ghost" id="refreshEvents">Regroup</button>
-  </div>
-  <div id="eventGrid" class="event-grid"></div>
-</section>
+<section id="scrapView" class="view"><div class="scraptop noPrint"><select id="scrapEvent"></select><select id="scrapCategory"></select><select id="scrapTemplate"></select><select id="scrapScheme"><option value="classic">Classic paper</option><option value="botanical">Soft botanical</option><option value="vintage">Vintage scrapbook</option><option value="modern">Modern clean</option><option value="colorful">Colorful memory book</option><option value="moody">Dark / moody</option></select><button id="addDecoration" class="ghost">Add decoration</button><button id="downloadPdf" class="primary">Download PDF</button><button id="printPdf" class="secondary">Print / Save PDF</button></div>
+<div class="scrapgrid"><div><div id="pageStack" class="pages scheme-classic"></div><div class="small noPrint" style="margin-top:9px">Click any title, journal area, caption, prompt, or box and type. Edits save locally.</div></div><div class="card noPrint"><h3>Template Gallery</h3><p class="small">All layouts are 8.5 × 11. Choose an activity first, then a page style.</p><div id="templateGallery" class="gallery"></div></div></div></section>
 
-<section id="scrapView" class="view">
-  <div class="scrap-controls no-print">
-    <select id="scrapEvent"></select>
-    <select id="scrapActivity"></select>
-    <select id="scrapTemplate"></select>
-    <select id="scrapScheme">
-      <option value="classic">Classic paper</option>
-      <option value="botanical">Soft botanical</option>
-      <option value="vintage">Vintage scrapbook</option>
-      <option value="modern">Modern clean</option>
-      <option value="colorful">Colorful memory book</option>
-      <option value="moody">Dark / moody</option>
-    </select>
-    <button class="ghost" id="addDecoration">Add decoration</button>
-    <button class="primary" id="downloadPdf">Download PDF</button>
-    <button class="secondary" id="printPage">Print / Save PDF</button>
-  </div>
-  <div class="gridScrap">
-    <div>
-      <div id="pageStack" class="page-stack"></div>
-      <div class="scrap-help no-print">Click in any title, writing area, prompt box, or notes field and type. The app saves those page edits locally in this browser.</div>
-      <div class="print-note no-print">PDF note: <b>Download PDF</b> tries a direct export. If it fails or your browser is weird, use <b>Print / Save PDF</b> and choose <b>Save as PDF</b>.</div>
-    </div>
-    <div class="card no-print">
-      <h3>Template Gallery</h3>
-      <div class="small" style="margin-bottom:10px">All templates are 8.5 × 11 and grouped by activity type so you can quickly pick a road-trip page, a hiking log, a sports recap, a kids page, a daily journal, and so on.</div>
-      <div id="templateFilters" class="filter-bar"></div>
-      <div id="templateGallery" class="template-gallery"></div>
-    </div>
-  </div>
-</section>
+<section id="socialView" class="view"><div class="socialgrid"><div class="card"><h2>Import a social post</h2><p class="muted">Paste a public Instagram, Facebook, or Threads URL. The app will try Meta's public oEmbed preview. Comments can be saved through authorized API access or pasted manually.</p>
+<div class="field"><label>Post URL</label><input id="socialUrl" placeholder="https://www.instagram.com/p/…"></div><div class="row" style="margin-top:9px"><div class="field"><label>Event / location</label><input id="socialLocation" placeholder="Egypt trip, Xander, daily life…"></div><div class="field"><label>Date</label><input id="socialDate" type="datetime-local"></div></div>
+<div class="field" style="margin-top:9px"><label>Caption / your note (optional)</label><textarea id="socialCaption" rows="4" placeholder="Auto-filled when possible; you can type or paste the caption here."></textarea></div>
+<div class="checks"><label><input id="socialComments" type="checkbox" checked> Include comments</label><label><input id="socialReplies" type="checkbox" checked> Include replies</label><label><input id="socialNames" type="checkbox" checked> Save names</label><label><input id="socialTimes" type="checkbox" checked> Save dates/times</label><label><input id="socialSnapshot" type="checkbox" checked> Save embed snapshot</label><label><input id="socialOrder" type="checkbox" checked> Preserve order</label></div>
+<details><summary><b>Authorized Meta comments import</b></summary><div class="row" style="margin-top:8px"><div class="field"><label>Post / Media object ID</label><input id="socialObjectId" placeholder="Object ID"></div><div class="field"><label>Temporary access token</label><input id="socialToken" type="password" autocomplete="off" placeholder="Not stored"></div></div><div class="small">Only use a token issued to you for content your account/app is allowed to access. The token is cleared after import and is not written to backups.</div></details>
+<details style="margin-top:9px"><summary><b>Paste comments fallback</b></summary><div class="field" style="margin-top:8px"><label>Comments</label><textarea id="manualComments" rows="8" placeholder="Name: comment text\n> Name: reply text\nAnother person: another comment"></textarea></div></details>
+<div class="row" style="margin-top:12px"><button id="previewSocial" class="ghost">Preview public post</button><button id="importSocial" class="primary">Import post + comments</button></div><div id="socialStatus" class="small" style="margin-top:8px"></div></div>
+<div class="card"><h3>Preview</h3><div id="socialPreview" class="socialpreview"><div class="muted">Paste a public post URL to preview it.</div></div><div class="notice">Public oEmbed is for the post itself. A public URL does not guarantee that Meta exposes the entire comment database. The app tells you when comments may be incomplete.</div></div></div></section>
 
-
-<section id="socialView" class="view">
-  <div class="social-grid">
-    <div class="social-box">
-      <h2>Import a social post</h2>
-      <p class="muted">Paste a public Instagram, Facebook, or Threads post. The app saves the post into your scrapbook and can also save comments when Meta makes them available to the account/API you connect.</p>
-      <div class="field"><label>Post URL</label><input id="socialUrl" placeholder="https://www.instagram.com/p/... or Facebook post URL"></div>
-      <div class="row" style="margin-top:10px">
-        <div class="field"><label>Event / location (optional)</label><input id="socialLocation" placeholder="Egypt trip, Xander, daily life..."></div>
-        <div class="field"><label>Date (optional)</label><input id="socialDate" type="datetime-local"></div>
-      </div>
-      <div class="social-options">
-        <label><input id="socialComments" type="checkbox" checked> Include all comments</label>
-        <label><input id="socialReplies" type="checkbox" checked> Include replies</label>
-        <label><input id="socialNames" type="checkbox" checked> Save commenter names</label>
-        <label><input id="socialTimes" type="checkbox" checked> Save dates/times</label>
-        <label><input id="socialOrder" type="checkbox" checked> Preserve original order</label>
-        <label><input id="socialSnapshot" type="checkbox" checked> Save scrapbook snapshot</label>
-      </div>
-      <div class="notice"><b>For complete comments:</b> public oEmbed gives the post itself, not necessarily the full comment database. For posts you can access through Meta's API, add the post/media ID and access token below. The token is used only for this import and is not stored.</div>
-      <details>
-        <summary style="cursor:pointer;font-weight:700">Meta API connection for comments</summary>
-        <div class="row" style="margin-top:10px">
-          <div class="field"><label>Post / Media Object ID</label><input id="socialObjectId" placeholder="Meta object ID"></div>
-          <div class="field"><label>Access token</label><input id="socialToken" type="password" autocomplete="off" placeholder="Temporary access token"></div>
-        </div>
-        <div class="token-note">The app never writes the token to IndexedDB, backups, or the imported entry.</div>
-      </details>
-      <details style="margin-top:10px">
-        <summary style="cursor:pointer;font-weight:700">Fallback: paste comments if Meta does not expose them</summary>
-        <div class="field" style="margin-top:8px"><label>Comments text</label><textarea id="socialManualComments" rows="7" placeholder="Paste copied comments here. Put each comment on its own line, or use Name: comment text."></textarea></div>
-      </details>
-      <div class="row" style="margin-top:14px">
-        <button class="primary" id="importSocial">Import post + comments</button>
-        <button class="ghost" id="previewSocial">Preview public post</button>
-      </div>
-      <div id="socialStatus" class="social-status"></div>
-    </div>
-    <div class="social-box">
-      <h3>Preview</h3>
-      <div id="socialPreview" class="social-preview"><div class="muted">Paste a social post URL to preview it here.</div></div>
-      <div class="notice" style="margin-top:14px">After import, social posts behave like normal scrapbook material. You can group them into an event and use the Social Post or Comment Thread 8.5 × 11 templates.</div>
-    </div>
-  </div>
-</section>
-
-<section id="importView" class="view">
-  <div class="grid2">
-    <div class="card">
-      <h2>Import your blog</h2>
-      <p class="muted">For WordPress, paste the public blog address. The app will try the WordPress REST feed. You can also import a WordPress XML export below.</p>
-      <div class="row">
-        <input id="blogUrl" placeholder="https://yourblog.com" style="flex:1;border:1px solid var(--line);border-radius:10px;padding:10px">
-        <button class="primary" id="importBlogUrl">Import posts</button>
-      </div>
-      <div id="blogStatus" class="small" style="margin-top:8px"></div>
-      <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
-      <label class="small">WordPress XML, JSON backup, HTML/TXT</label>
-      <input id="importFile" type="file" accept=".xml,.json,.html,.htm,.txt" style="display:block;margin:8px 0 12px">
-      <button class="ghost" id="importSelectedFile">Import selected file</button>
-    </div>
-    <div class="card">
-      <h2>Backup / move your scrapbook</h2>
-      <p class="muted">Export a JSON backup anytime. It includes your text, organization, scrapbook notes, and image data.</p>
-      <div class="row">
-        <button class="primary" id="exportBackup">Export backup</button>
-        <button class="ghost" id="exportText">Export readable HTML</button>
-      </div>
-      <div class="notice">This version stores everything locally in your browser. Keep backups if you use it heavily.</div>
-      <button class="danger" id="wipeAll">Erase local scrapbook</button>
-    </div>
-  </div>
-</section>
+<section id="importView" class="view"><div class="grid2"><div class="card"><h2>Import your blog</h2><p class="muted">WordPress public REST import, or upload WordPress XML / JSON / HTML / TXT.</p><div class="row"><input id="blogUrl" style="flex:1" placeholder="https://yourblog.com"><button id="importBlog" class="primary">Import posts</button></div><div id="blogStatus" class="small" style="margin-top:7px"></div><hr style="border:0;border-top:1px solid var(--line);margin:16px 0"><input id="importFile" type="file" accept=".xml,.json,.html,.htm,.txt"><button id="importSelected" class="ghost" style="margin-top:9px">Import selected file</button></div>
+<div class="card"><h2>Backup / export</h2><p class="muted">Until cloud sync is added, your entries/photos live in this browser's IndexedDB. Back up regularly.</p><div class="row"><button id="exportBackup" class="primary">Export backup</button><button id="exportHtml" class="ghost">Export readable HTML</button></div><div class="notice">Do not upload your exported scrapbook JSON to the public GitHub repository.</div><button id="wipeAll" class="danger">Erase local scrapbook</button></div></div></section>
 </main>
 
-<dialog id="editDialog">
-  <div class="modal">
-    <h2>Edit entry</h2>
-    <div class="row">
-      <div class="field"><label>Title</label><input id="editTitle"></div>
-      <div class="field"><label>Date</label><input id="editDate" type="datetime-local"></div>
-    </div>
-    <div class="row" style="margin-top:10px">
-      <div class="field"><label>Location</label><input id="editLocation"></div>
-      <div class="field"><label>Tags</label><input id="editTags"></div>
-    </div>
-    <div class="field" style="margin-top:10px"><label>Writing</label><textarea id="editText"></textarea></div>
-    <div class="row" style="margin-top:12px">
-      <button class="primary" id="saveEdit">Save changes</button>
-      <button class="ghost" id="cancelEdit">Cancel</button>
-      <button class="danger" id="deleteEntry">Delete</button>
-    </div>
-  </div>
-</dialog>
+<dialog id="editDialog"><div class="modal"><h2>Edit entry</h2><div class="row"><div class="field"><label>Title</label><input id="editTitle"></div><div class="field"><label>Date</label><input id="editDate" type="datetime-local"></div></div><div class="row" style="margin-top:9px"><div class="field"><label>Location / event</label><input id="editLocation"></div><div class="field"><label>Tags</label><input id="editTags"></div></div><div class="field" style="margin-top:9px"><label>Source URL</label><input id="editSource"></div><div class="field" style="margin-top:9px"><label>Writing</label><textarea id="editText"></textarea></div><div class="row" style="margin-top:12px"><button id="saveEdit" class="primary">Save</button><button id="cancelEdit" class="ghost">Cancel</button><button id="deleteEntry" class="danger">Delete</button></div></div></dialog>
 
 <script>
-const DB_NAME='lifeScrapbookDB', DB_VERSION=1;
-let db, entries=[], currentEditId=null, selectedFiles=[], scrapDrafts={}, scrapScheme='classic';
-let templateFilter='All';
-const templateDefs=[
-  {id:'freeform',category:'Journal & Daily',name:'Freeform Scrapbook',desc:'Big title, photos, journal text',thumb:'photo'},
-  {id:'linedBotanical',category:'Journal & Daily',name:'Botanical Journal',desc:'Minimal lined journal with leaf accent',thumb:'lined'},
-  {id:'notebookHearts',category:'Journal & Daily',name:'Notebook Page',desc:'Cute ruled page with binder holes',thumb:'notebook'},
-  {id:'moodyTree',category:'Journal & Daily',name:'Moody Tree Page',desc:'Reflective lined journal page',thumb:'lined'},
-  {id:'dailyPlanner',category:'Journal & Daily',name:'Daily Journal Planner',desc:'Priorities, journal, notes and gratitude',thumb:'grid'},
-  {id:'monthlyPlanner',category:'Journal & Daily',name:'Monthly Planner',desc:'Month-at-a-glance layout',thumb:'grid'},
-
-  {id:'travelAbroad',category:'Travel Abroad',name:'Travel Abroad Story',desc:'Destination, dates, photos and story',thumb:'photo'},
-  {id:'photoStory',category:'Travel Abroad',name:'Travel Photo Story',desc:'Large photo + smaller moments + notes',thumb:'photo'},
-  {id:'postcardTravel',category:'Travel Abroad',name:'Postcard Journal',desc:'Postcard-style travel memory page',thumb:'photo'},
-
-  {id:'roadTrip',category:'Road Trips',name:'Road Trip Log',desc:'Route, stops, mileage, photos and memories',thumb:'grid'},
-  {id:'roadTripPhotos',category:'Road Trips',name:'Road Trip Photo Strip',desc:'Scenic photos with timeline captions',thumb:'photo'},
-
-  {id:'campground',category:'Camping',name:'Campground Log',desc:'Camping details, checklist and memories',thumb:'grid'},
-  {id:'campingStory',category:'Camping',name:'Campfire Story Page',desc:'Photos, favorite moment and camp notes',thumb:'photo'},
-
-  {id:'hiking',category:'Hiking & Outdoors',name:'Hiking Logbook',desc:'Trail facts, conditions and highlights',thumb:'grid'},
-  {id:'outdoorAdventure',category:'Hiking & Outdoors',name:'Outdoor Adventure',desc:'Big photo, stats and story',thumb:'photo'},
-
-  {id:'kidMemory',category:'Kids & Family',name:'Kid Memory Page',desc:'Funny quote, milestone, story and photos',thumb:'photo'},
-  {id:'familyDay',category:'Kids & Family',name:'Family Day',desc:'Who, where, what happened, photo collage',thumb:'photo'},
-
-  {id:'sportsRecap',category:'Sports',name:'Game / Sports Recap',desc:'Opponent, score, highlights and photos',thumb:'grid'},
-  {id:'sportsPhoto',category:'Sports',name:'Sports Photo Story',desc:'Action photos with captions and stats',thumb:'photo'},
-
-  {id:'socialPost',category:'Social & Online',name:'Social Post Snapshot',desc:'Post, caption and selected comments',thumb:'photo'},
-  {id:'socialThread',category:'Social & Online',name:'Full Comment Thread',desc:'Post followed by printable comments',thumb:'grid'},
-
-  {id:'storyboard3',category:'Creative & Storytelling',name:'Storyboard · 3 Frames',desc:'Professional storyboard page',thumb:'storyboard'},
-  {id:'storyboard6',category:'Creative & Storytelling',name:'Storyboard · 6 Frames',desc:'More frames on one page',thumb:'storyboard'},
-
-  {id:'shadowPrompt',category:'Reflection & Prompts',name:'Prompt Worksheet',desc:'Prompt page with write-in sections',thumb:'grid'},
-  {id:'shadowGrid',category:'Reflection & Prompts',name:'Reflection Grid',desc:'Four self-reflection boxes',thumb:'grid'},
-
-  {id:'recipeStory',category:'Food & Recipes',name:'Cookbook / Recipe Story',desc:'Recipe page or food memory page',thumb:'photo'}
+const DB='lifeScrapbookDB', VER=1;
+let db,entries=[],selectedFiles=[],editId=null,drafts={},scheme='classic',deferredInstall=null,lastSocialPreview=null;
+const templates=[
+{id:'freeform',cat:'Journal & Daily',name:'Freeform Memory',layout:'photo',desc:'Photos + story',thumb:'photo'},
+{id:'botanical',cat:'Journal & Daily',name:'Botanical Journal',layout:'linedBotanical',desc:'Minimal ruled journal',thumb:'lines'},
+{id:'notebook',cat:'Journal & Daily',name:'Notebook Page',layout:'notebook',desc:'Binder-paper journal',thumb:'lines'},
+{id:'daily',cat:'Journal & Daily',name:'Daily Journal Planner',layout:'daily',desc:'Priorities, notes, gratitude',thumb:'grid'},
+{id:'gratitude',cat:'Journal & Daily',name:'Gratitude + Reflection',layout:'prompts',desc:'Prompted daily reflection',thumb:'grid'},
+{id:'month',cat:'Journal & Daily',name:'Monthly Snapshot',layout:'month',desc:'Month-at-a-glance memory',thumb:'grid'},
+{id:'travelstory',cat:'Travel Abroad',name:'Destination Story',layout:'photo',desc:'Destination photos + story',thumb:'photo'},
+{id:'passport',cat:'Travel Abroad',name:'Passport / Itinerary',layout:'stats',desc:'Places, dates, highlights',thumb:'grid'},
+{id:'postcard',cat:'Travel Abroad',name:'Postcard Journal',layout:'postcard',desc:'Big image + postcard note',thumb:'photo'},
+{id:'travelmosaic',cat:'Travel Abroad',name:'Travel Photo Mosaic',layout:'mosaic',desc:'Many photos + captions',thumb:'photo'},
+{id:'roadlog',cat:'Road Trips',name:'Road Trip Log',layout:'stats',desc:'Route, mileage, stops',thumb:'grid'},
+{id:'route',cat:'Road Trips',name:'Route & Stops Timeline',layout:'timeline',desc:'Chronological stops',thumb:'grid'},
+{id:'roadphotos',cat:'Road Trips',name:'Road Trip Photo Strip',layout:'mosaic',desc:'Scenery + moments',thumb:'photo'},
+{id:'campground',cat:'Camping',name:'Campground Log',layout:'stats',desc:'Site, weather, amenities',thumb:'grid'},
+{id:'campfire',cat:'Camping',name:'Campfire Story',layout:'photo',desc:'Photos + favorite memory',thumb:'photo'},
+{id:'campcheck',cat:'Camping',name:'Camping Checklist + Notes',layout:'checklist',desc:'Packing + trip notes',thumb:'grid'},
+{id:'hikelog',cat:'Hiking & Outdoors',name:'Hiking Logbook',layout:'stats',desc:'Trail, distance, weather',thumb:'grid'},
+{id:'adventure',cat:'Hiking & Outdoors',name:'Outdoor Adventure',layout:'photo',desc:'Big photo + trip story',thumb:'photo'},
+{id:'nature',cat:'Hiking & Outdoors',name:'Nature Journal',layout:'linedBotanical',desc:'Ruled nature notes',thumb:'lines'},
+{id:'kidmemory',cat:'Kids & Family',name:'Kid Memory Page',layout:'photo',desc:'Photo + memory',thumb:'photo'},
+{id:'milestone',cat:'Kids & Family',name:'Milestone Page',layout:'stats',desc:'Age, date, what changed',thumb:'grid'},
+{id:'familyday',cat:'Kids & Family',name:'Family Day',layout:'mosaic',desc:'Photos + family story',thumb:'photo'},
+{id:'quotes',cat:'Kids & Family',name:'Funny Things They Said',layout:'quotes',desc:'Quote collection',thumb:'lines'},
+{id:'gamerecap',cat:'Sports',name:'Game / Sports Recap',layout:'stats',desc:'Opponent, score, highlights',thumb:'grid'},
+{id:'season',cat:'Sports',name:'Season Memory',layout:'timeline',desc:'Games + season moments',thumb:'grid'},
+{id:'sportphoto',cat:'Sports',name:'Sports Photo Story',layout:'mosaic',desc:'Action photos + captions',thumb:'photo'},
+{id:'socialpost',cat:'Social & Online',name:'Social Post Snapshot',layout:'social',desc:'Post + selected comments',thumb:'photo'},
+{id:'socialthread',cat:'Social & Online',name:'Full Comment Thread',layout:'thread',desc:'Printable comments over pages',thumb:'grid'},
+{id:'story3',cat:'Creative & Storytelling',name:'Storyboard · 3 Frames',layout:'story3',desc:'Three storyboard frames',thumb:'story'},
+{id:'story6',cat:'Creative & Storytelling',name:'Storyboard · 6 Frames',layout:'story6',desc:'Six storyboard frames',thumb:'story'},
+{id:'timeline',cat:'Creative & Storytelling',name:'Story Timeline',layout:'timeline',desc:'Moment-by-moment story',thumb:'grid'},
+{id:'prompts',cat:'Reflection & Prompts',name:'Prompt Worksheet',layout:'prompts',desc:'Three write-in prompts',thumb:'grid'},
+{id:'reflect',cat:'Reflection & Prompts',name:'Reflection Grid',layout:'grid4',desc:'Four reflection boxes',thumb:'grid'},
+{id:'recipe',cat:'Food & Recipes',name:'Recipe Story',layout:'recipe',desc:'Recipe + memory',thumb:'photo'},
+{id:'foodmemory',cat:'Food & Recipes',name:'Food Memory',layout:'photo',desc:'Photo + story',thumb:'photo'}
 ];
-const categoryOrder=['Journal','Travel','Outdoors','Family / Kids','Sports','Scrapbook','Storyboard','Worksheets'];
-
-function openDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,DB_VERSION);req.onupgradeneeded=e=>{const d=e.target.result;if(!d.objectStoreNames.contains('entries')) d.createObjectStore('entries',{keyPath:'id'});if(!d.objectStoreNames.contains('settings')) d.createObjectStore('settings',{keyPath:'key'});};req.onsuccess=e=>{db=e.target.result;resolve(db)};req.onerror=()=>reject(req.error);});}
-function store(name,mode='readonly'){return db.transaction(name,mode).objectStore(name)}
-function getAllEntries(){return new Promise((res,rej)=>{const r=store('entries').getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error)})}
-function putEntry(e){return new Promise((res,rej)=>{const r=store('entries','readwrite').put(e);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
-function delEntry(id){return new Promise((res,rej)=>{const r=store('entries','readwrite').delete(id);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
-function clearEntries(){return new Promise((res,rej)=>{const r=store('entries','readwrite').clear();r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
-function getSetting(key){return new Promise((res)=>{const r=store('settings').get(key);r.onsuccess=()=>res(r.result?.value);r.onerror=()=>res(undefined)})}
-function setSetting(key,value){return new Promise((res,rej)=>{const r=store('settings','readwrite').put({key,value});r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
-
-function nowLocalInput(d=new Date()){const z=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`;}
-function safeDate(v){const d=new Date(v);return isNaN(d)?new Date():d}
-function formatDate(v){return safeDate(v).toLocaleString([], {year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}
+const cats=[...new Set(templates.map(t=>t.cat))];
+function tx(name,mode='readonly'){return db.transaction(name,mode).objectStore(name)}
+function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB,VER);r.onupgradeneeded=e=>{const d=e.target.result;if(!d.objectStoreNames.contains('entries'))d.createObjectStore('entries',{keyPath:'id'});if(!d.objectStoreNames.contains('settings'))d.createObjectStore('settings',{keyPath:'key'})};r.onsuccess=e=>{db=e.target.result;res()};r.onerror=()=>rej(r.error)})}
+function getEntries(){return new Promise((res,rej)=>{const r=tx('entries').getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error)})}
+function putEntry(e){return new Promise((res,rej)=>{const r=tx('entries','readwrite').put(e);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
+function removeEntry(id){return new Promise((res,rej)=>{const r=tx('entries','readwrite').delete(id);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
+function clearEntries(){return new Promise((res,rej)=>{const r=tx('entries','readwrite').clear();r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
+function getSetting(key){return new Promise(res=>{const r=tx('settings').get(key);r.onsuccess=()=>res(r.result?.value);r.onerror=()=>res(undefined)})}
+function setSetting(key,value){return new Promise((res,rej)=>{const r=tx('settings','readwrite').put({key,value});r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
+function id(){return crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(16).slice(2)}
 function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function stripHtml(s=''){const d=document.createElement('div');d.innerHTML=s;return d.textContent||''}
-function uuid(){return crypto.randomUUID ? crypto.randomUUID() : Date.now()+'-'+Math.random().toString(16).slice(2)}
-function normalizeLoc(s=''){return s.trim().toLowerCase().replace(/\s+/g,' ')}
-function fileToDataURL(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
-function arrBuffer(file){return file.arrayBuffer()}
-function mediaCount(){return entries.reduce((n,e)=>n+(e.media?.filter(m=>m.type.startsWith('image/')).length||0),0)}
+function safeDate(v){const d=new Date(v);return isNaN(d)?new Date():d}function fmt(v){return safeDate(v).toLocaleString([],{year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}function localInput(d=new Date()){const z=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`}
+function stripHtml(s=''){const d=document.createElement('div');d.innerHTML=s;return d.textContent||''}function norm(s=''){return s.trim().toLowerCase().replace(/\s+/g,' ')}
+function fileURL(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
+function parseExif(buf){try{const v=new DataView(buf);if(v.getUint16(0,false)!==0xFFD8)return{};let o=2;while(o<v.byteLength){if(v.getUint8(o)!==0xFF)break;const m=v.getUint8(o+1),sz=v.getUint16(o+2,false);if(m===0xE1){const ex=o+4;if(String.fromCharCode(v.getUint8(ex),v.getUint8(ex+1),v.getUint8(ex+2),v.getUint8(ex+3))!=='Exif'){o+=2+sz;continue}const t=ex+6,l=v.getUint16(t,false)===0x4949,u16=p=>v.getUint16(p,l),u32=p=>v.getUint32(p,l);const first=t+u32(t+4);function ifd(p){const n=u16(p),x={};for(let i=0;i<n;i++){const q=p+2+i*12;if(q+12>v.byteLength)break;x[u16(q)]={count:u32(q+4),val:q+8}}return x}function ascii(tag){if(!tag)return'';let p=tag.count<=4?tag.val:t+u32(tag.val),s='';for(let i=0;i<tag.count-1&&p+i<v.byteLength;i++)s+=String.fromCharCode(v.getUint8(p+i));return s}const root=ifd(first),out={};if(root[0x8769]){const exif=ifd(t+u32(root[0x8769].val));out.date=ascii(exif[0x9003]||exif[0x0132])}else out.date=ascii(root[0x0132]);return out}o+=2+sz}}catch(e){}return{}}
+function exifISO(s){const m=(s||'').match(/(\d{4}):(\d{2}):(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);return m?new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+m[6]).toISOString():null}
+async function mediaFile(f){let meta={};if(f.type==='image/jpeg'||/\.jpe?g$/i.test(f.name))meta=parseExif(await f.arrayBuffer());return{id:id(),name:f.name,type:f.type||'application/octet-stream',data:await fileURL(f),takenAt:exifISO(meta.date)||new Date(f.lastModified||Date.now()).toISOString()}}
+function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===v));document.querySelectorAll('nav [data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===v));if(v==='inboxView')renderInbox();if(v==='eventsView')renderEvents();if(v==='scrapView')renderScrap();if(v==='socialView'&&!document.getElementById('socialDate').value)document.getElementById('socialDate').value=localInput()}
+document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>showView(b.dataset.view));document.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>showView(b.dataset.jump));
+function groups(){const arr=[...entries].sort((a,b)=>new Date(a.date)-new Date(b.date)),gs=[];for(const e of arr){const loc=norm(e.location),dt=new Date(e.date);let g=gs.find(x=>loc&&x.loc===loc&&Math.abs(dt-new Date(x.last))/864e5<=21);if(!g&&!loc)g=gs.find(x=>!x.loc&&Math.abs(dt-new Date(x.last))/864e5<=1.5);if(!g){g={id:id(),loc,location:e.location||'',items:[],first:e.date,last:e.date};gs.push(g)}g.items.push(e);if(new Date(e.date)<new Date(g.first))g.first=e.date;if(new Date(e.date)>new Date(g.last))g.last=e.date}return gs.map(g=>{const a=safeDate(g.first),b=safeDate(g.last),same=a.toDateString()===b.toDateString();return{...g,title:g.location||g.items.find(x=>x.title)?.title||a.toLocaleDateString(),dateLabel:same?a.toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'}):`${a.toLocaleDateString([],{month:'short',day:'numeric'})} – ${b.toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'})}`}}).sort((a,b)=>new Date(b.first)-new Date(a.first))}
+function imageCount(){return entries.reduce((n,e)=>n+(e.media||[]).filter(m=>m.type.startsWith('image/')).length,0)}function updateStats(){statEntries.textContent=entries.length;statPhotos.textContent=imageCount();statEvents.textContent=groups().length}
+function flatComments(cs=[],depth=0){const out=[];for(const c of cs){out.push({...c,depth});if(c.replies?.length)out.push(...flatComments(c.replies,depth+1))}return out}
+function socialCard(s){const cs=flatComments(s.comments||[]);return`<div class="socialcard"><div class="row" style="justify-content:space-between"><div><span class="pill">${esc(s.platform||'social')}</span> <b>${esc(s.author||'Public post')}</b></div><a class="small" href="${esc(s.url||'')}" target="_blank" rel="noopener">Open original</a></div>${s.caption?`<div style="margin-top:8px;white-space:pre-wrap">${esc(s.caption)}</div>`:''}<details ${cs.length<10?'open':''}><summary>${cs.length} saved comment/repl${cs.length===1?'y':'ies'}${s.commentsComplete===false?' · may be incomplete':''}</summary><div class="comments">${cs.slice(0,100).map(c=>`<div class="comment ${c.depth?'reply':''}"><div class="commentmeta">${esc(c.name||'Comment')}${c.timestamp?' · '+esc(fmt(c.timestamp)):''}</div>${esc(c.text||'')}</div>`).join('')}</div></details></div>`}
+function renderInbox(){const q=searchBox.value.toLowerCase().trim(),dir=sortBox.value==='new'?-1:1;const list=entries.filter(e=>[e.title,e.text,e.location,e.sourceUrl,(e.tags||[]).join(' ')].join(' ').toLowerCase().includes(q)).sort((a,b)=>(new Date(a.date)-new Date(b.date))*dir);entryList.innerHTML=list.length?list.map(e=>`<article class="entry"><div class="entryhead"><div><div class="entrytitle">${esc(e.title||'Untitled memory')}</div><div class="small">${fmt(e.date)}${e.location?' · '+esc(e.location):''}</div></div><button class="ghost" onclick="openEdit('${e.id}')">Edit</button></div>${e.text?`<div style="margin-top:8px;white-space:pre-wrap">${esc(e.text)}</div>`:''}${(e.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}${e.sourceUrl&&!e.social?`<div class="small" style="margin-top:7px"><a target="_blank" rel="noopener" href="${esc(e.sourceUrl)}">Open source link</a></div>`:''}${e.social?socialCard(e.social):''}${(e.media||[]).some(m=>m.type.startsWith('image/'))?`<div class="media">${(e.media||[]).filter(m=>m.type.startsWith('image/')).map(m=>`<img src="${m.data}">`).join('')}</div>`:''}</article>`).join(''):'<div class="card muted">Nothing here yet.</div>'}
+searchBox.oninput=renderInbox;sortBox.onchange=renderInbox;
+function eventPhotos(g,n=4){return(g?.items||[]).flatMap(e=>e.media||[]).filter(m=>m.type.startsWith('image/')).slice(0,n)}
+function renderEvents(){const gs=groups();eventGrid.innerHTML=gs.length?gs.map((g,i)=>{const p=eventPhotos(g,4);return`<article class="event"><div class="eventcover">${p.length?p.map(x=>`<img src="${x.data}">`).join(''):'<div class="muted" style="grid-column:1/-1;display:grid;place-items:center">No photos yet</div>'}</div><div class="eventbody"><h3>${esc(g.title)}</h3><div class="eventmeta">${esc(g.dateLabel)} · ${g.items.length} entries</div><button class="primary" onclick="openScrap(${i})">Make scrapbook page</button></div></article>`}).join(''):'<div class="card muted">Add some entries first.</div>'}
+refreshEvents.onclick=renderEvents;window.openScrap=i=>{showView('scrapView');scrapEvent.value=String(i);renderScrap()};
+function currentGroup(){return groups()[+scrapEvent.value||0]||null}function currentTemplate(){return templates.find(t=>t.id===scrapTemplate.value)||templates[0]}function pfx(){const g=currentGroup(),t=currentTemplate();return`${g?.items.map(x=>x.id).join('|')||'none'}::${t.id}`}
+function dv(k,f=''){return Object.prototype.hasOwnProperty.call(drafts,k)?drafts[k]:f}function ed(key,f='',cls=''){return`<div class="editable ${cls}" contenteditable="true" data-draft="${esc(key)}">${esc(dv(key,f))}</div>`}function photo(p,cls=''){return p?`<div class="photoBox ${cls}"><img src="${p.data}"></div>`:`<div class="photoBox ${cls}">Photo</div>`}
+function bindDrafts(){document.querySelectorAll('[data-draft]').forEach(el=>el.addEventListener('input',()=>{drafts[el.dataset.draft]=el.innerText;setSetting('drafts',drafts)}))}
+function baseData(){const g=currentGroup(),p=eventPhotos(g,12),text=(g?.items||[]).map(e=>e.text||'').filter(Boolean).join('\n\n'),social=(g?.items||[]).find(e=>e.social)?.social;return{g,p,text,social,title:g?.title||'My Journal',sub:g?.dateLabel||new Date().toLocaleDateString()}}
+function page(inner,extra=''){return`<div class="letter ${extra}"><div class="pin">${inner}</div></div>`}
+function renderLayout(){const t=currentTemplate(),d=baseData(),k=pfx(),title=ed(k+'::title',d.title,'ptitle'),sub=ed(k+'::sub',d.sub,'psub');const story=d.text||'Click here and write the story…';let out='';
+if(t.layout==='photo')out=page(`${title}${sub}<div class="photoLayout">${photo(d.p[0],'hero')}<div class="sidephotos">${photo(d.p[1],'smallphoto')}${photo(d.p[2],'smallphoto')}</div></div><div style="margin-top:12px">${ed(k+'::story',story,'textBox')}</div>`);
+else if(t.layout==='mosaic')out=page(`${title}${sub}<div class="boxes2">${[0,1,2,3,4,5].map(i=>photo(d.p[i],'smallphoto')).join('')}</div><div style="margin-top:10px">${ed(k+'::story',story,'textBox')}</div>`);
+else if(t.layout==='linedBotanical')out=page(`${title}${sub}${ed(k+'::body',story,'linedwrite')}`,'lined botanical');
+else if(t.layout==='notebook')out=page(`<div style="padding-left:.88in">${title}${sub}${ed(k+'::body',story,'linedwrite')}</div>`,'lined notebook');
+else if(t.layout==='daily')out=page(`${title}${sub}<div class="boxes2"><div class="box"><div class="label">Top priorities</div>${ed(k+'::a','')}</div><div class="box"><div class="label">To-do</div>${ed(k+'::b','• \n• \n• ')}</div><div class="box bigbox"><div class="label">Journal</div>${ed(k+'::c',story)}</div><div><div class="box"><div class="label">Gratitude</div>${ed(k+'::d','')}</div><div class="box" style="margin-top:10px"><div class="label">Mood / wins</div>${ed(k+'::e','')}</div></div></div>`);
+else if(t.layout==='month'){const names=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];out=page(`${title}${sub}<div class="month">${names.map(n=>`<div class="dayname">${n}</div>`).join('')}${Array.from({length:35},(_,i)=>`<div class="day"><b style="font-size:10px">${i<31?i+1:''}</b>${ed(k+'::m'+i,'')}</div>`).join('')}</div>`)}
+else if(t.layout==='stats'){const labels=t.cat==='Sports'?['Opponent / event','Score / result','Location','Who was there','Best moment','What I want to remember']:t.cat==='Camping'?['Campground / site','Location','Dates','Weather','Amenities','Favorite moment']:t.cat==='Hiking & Outdoors'?['Trail / destination','Distance / time','Weather','Conditions','Who went','Best moment']:t.cat==='Kids & Family'?['Age / milestone','Date','Place','Who was there','What happened','Why it mattered']:t.cat==='Road Trips'?['Start','Destination','Mileage','Stops','Best stop','What happened']:['Destination','Dates','Places','People','Best moment','What surprised me'];out=page(`${title}${sub}<div class="boxes2">${labels.map((x,i)=>`<div class="box"><div class="label">${esc(x)}</div>${ed(k+'::s'+i,i===0?(d.g?.location||''):'')}</div>`).join('')}</div><div style="margin-top:10px">${ed(k+'::notes',story,'textBox')}</div>`)}
+else if(t.layout==='postcard')out=page(`${title}${sub}${photo(d.p[0],'hero')}<div class="boxes2" style="margin-top:12px"><div class="box bigbox"><div class="label">Postcard message</div>${ed(k+'::msg',story)}</div><div class="box bigbox"><div class="label">From / to / place</div>${ed(k+'::addr',d.g?.location||'')}</div></div>`);
+else if(t.layout==='checklist')out=page(`${title}${sub}<div class="boxes2"><div class="box bigbox"><div class="label">Bring / pack</div>${ed(k+'::pack','☐ \n☐ \n☐ \n☐ \n☐ \n☐ ')}</div><div class="box bigbox"><div class="label">Food / supplies</div>${ed(k+'::food','☐ \n☐ \n☐ \n☐ ')}</div></div><div style="margin-top:10px">${ed(k+'::notes',story,'textBox')}</div>`);
+else if(t.layout==='timeline'){const parts=story.split(/\n\n+/).slice(0,7);out=page(`${title}${sub}<div class="timeline">${Array.from({length:6},(_,i)=>`<div class="timeitem"><div class="label">Stop / moment ${i+1}</div>${ed(k+'::time'+i,parts[i]||'')}</div>`).join('')}</div>`)}
+else if(t.layout==='quotes')out=page(`${title}${sub}${Array.from({length:7},(_,i)=>`<div class="quote">${ed(k+'::q'+i,i===0?'“Write the quote here.”':'')}</div>`).join('')}`);
+else if(t.layout==='prompts'){const qs=['What stands out most about this day or event?','What were you feeling that you did not say out loud?','What do you want to remember a year from now?'];out=page(`${title}${sub}${qs.map((q,i)=>`<div class="box bigbox" style="margin-bottom:10px"><div class="label">${esc(q)}</div>${ed(k+'::p'+i,i===0?story:'')}</div>`).join('')}`)}
+else if(t.layout==='grid4')out=page(`${title}${sub}<div class="boxes2">${['What happened','What I felt','What I learned','What I want next'].map((x,i)=>`<div class="box bigbox"><div class="label">${x}</div>${ed(k+'::g'+i,i===0?story:'')}</div>`).join('')}</div>`);
+else if(t.layout==='recipe')out=page(`${title}${sub}<div class="photoLayout">${photo(d.p[0],'hero')}<div><div class="box bigbox"><div class="label">Ingredients / people / supplies</div>${ed(k+'::ingredients','')}</div><div class="box bigbox" style="margin-top:10px"><div class="label">Steps / story</div>${ed(k+'::steps',story)}</div></div></div>`);
+else if(t.layout==='story3'||t.layout==='story6'){const count=t.layout==='story3'?3:6;out=page(`${title}${sub}${Array.from({length:count},(_,i)=>`<div class="sbrow" style="${count===6?'margin-bottom:6px':''}"><div class="sbnote" style="${count===6?'min-height:.92in':''}">${ed(k+'::sb'+i,i===0?story.split('\n')[0]||'':'')}</div><div class="sbframe" style="${count===6?'min-height:.92in':''}">${d.p[i]?`<img src="${d.p[i].data}">`:''}</div></div>`).join('')}`)}
+else if(t.layout==='social'){const s=d.social;out=page(`${title}${sub}<div class="socialcard"><span class="pill">${esc(s?.platform||'social')}</span> <b>${esc(s?.author||'Public post')}</b>${s?.caption?`<div style="margin:10px 0;white-space:pre-wrap">${esc(s.caption)}</div>`:''}${s?.url?`<div class="small">${esc(s.url)}</div>`:''}</div><div class="comments">${flatComments(s?.comments||[]).slice(0,14).map(c=>`<div class="comment ${c.depth?'reply':''}"><div class="commentmeta">${esc(c.name||'Comment')}</div>${esc(c.text||'')}</div>`).join('')}</div>`)}
+else if(t.layout==='thread'){const s=d.social,cs=flatComments(s?.comments||[]);const chunks=[];for(let i=0;i<Math.max(1,cs.length);i+=18)chunks.push(cs.slice(i,i+18));out=chunks.map((chunk,pi)=>page(`${ed(k+'::title'+pi,pi===0?(d.title+' — Comments'):(d.title+' — Comments continued'),'ptitle')}<div class="psub">${esc(d.sub)} · Page ${pi+1}</div>${pi===0&&s?.caption?`<div class="textBox" style="min-height:auto;margin-bottom:8px">${esc(s.caption)}</div>`:''}<div class="comments">${chunk.map(c=>`<div class="comment ${c.depth?'reply':''}"><div class="commentmeta">${esc(c.name||'Comment')}${c.timestamp?' · '+esc(fmt(c.timestamp)):''}</div>${esc(c.text||'')}</div>`).join('')||'<div class="muted">No comments saved yet.</div>'}</div>`)).join('')}
+return out||page(`${title}${sub}${ed(k+'::story',story,'textBox')}`)}
+function renderSelectors(){const gs=groups(),oldE=scrapEvent.value,oldC=scrapCategory.value||'all',oldT=scrapTemplate.value||templates[0].id;scrapEvent.innerHTML=gs.length?gs.map((g,i)=>`<option value="${i}">${esc(g.title)} — ${esc(g.dateLabel)}</option>`).join(''):'<option value="0">No events yet</option>';scrapCategory.innerHTML='<option value="all">All activities</option>'+cats.map(c=>`<option>${esc(c)}</option>`).join('');if([...scrapEvent.options].some(o=>o.value===oldE))scrapEvent.value=oldE;if([...scrapCategory.options].some(o=>o.value===oldC))scrapCategory.value=oldC;const f=scrapCategory.value==='all'?templates:templates.filter(t=>t.cat===scrapCategory.value);scrapTemplate.innerHTML=f.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');if([...scrapTemplate.options].some(o=>o.value===oldT))scrapTemplate.value=oldT;scrapScheme.value=scheme}
+function renderGallery(){const selected=scrapCategory.value==='all'?templates:templates.filter(t=>t.cat===scrapCategory.value),cur=scrapTemplate.value;templateGallery.innerHTML=[...new Set(selected.map(t=>t.cat))].map(c=>`<div><div class="cathead">${esc(c)}</div>${selected.filter(t=>t.cat===c).map(t=>`<div class="tcard ${t.id===cur?'active':''}" data-t="${t.id}"><div class="thumb ${t.thumb}"></div><div><div class="tname">${esc(t.name)}</div><div class="tdesc">${esc(t.desc)}</div></div></div>`).join('')}</div>`).join('');templateGallery.querySelectorAll('[data-t]').forEach(x=>x.onclick=()=>{scrapTemplate.value=x.dataset.t;renderScrap()})}
+function renderScrap(){renderSelectors();renderGallery();pageStack.className='pages scheme-'+scheme;pageStack.innerHTML=currentGroup()?renderLayout():'<div class="card muted">Create an event first.</div>';bindDrafts()}
+scrapEvent.onchange=renderScrap;scrapCategory.onchange=renderScrap;scrapTemplate.onchange=renderScrap;scrapScheme.onchange=async()=>{scheme=scrapScheme.value;await setSetting('scheme',scheme);renderScrap()};addDecoration.onclick=()=>{const p=pageStack.querySelector('.letter');if(!p)return;const s=document.createElement('div');s.textContent=['★','✦','♥','✈','☀','✿','📍'][Math.floor(Math.random()*7)];s.style.cssText=`position:absolute;left:${12+Math.random()*75}%;top:${8+Math.random()*78}%;font-size:28px;opacity:.55`;p.appendChild(s)};
+function printPages(){const w=window.open('','_blank');if(!w)return alert('Allow pop-ups for printing.');const css=document.querySelector('style').outerHTML;w.document.write(`<!doctype html><html><head>${css}</head><body><main><section id="scrapView" class="view active"><div class="pages">${pageStack.innerHTML}</div></section></main><script>onload=()=>setTimeout(()=>print(),250)<\/script></body></html>`);w.document.close()}printPdf.onclick=printPages;downloadPdf.onclick=()=>{if(window.html2pdf){html2pdf().set({filename:`life-scrapbook-${currentTemplate().id}.pdf`,margin:0,image:{type:'jpeg',quality:.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'in',format:'letter',orientation:'portrait'},pagebreak:{mode:['css','legacy']}}).from(pageStack).save()}else printPages()};
 
-function parseExifJPEG(buffer){
-  try{
-    const view=new DataView(buffer); if(view.getUint16(0,false)!==0xFFD8) return {};
-    let offset=2;
-    while(offset<view.byteLength){
-      if(view.getUint8(offset)!==0xFF) break;
-      const marker=view.getUint8(offset+1); const size=view.getUint16(offset+2,false);
-      if(marker===0xE1){
-        const exif=offset+4;
-        if(String.fromCharCode(view.getUint8(exif),view.getUint8(exif+1),view.getUint8(exif+2),view.getUint8(exif+3))!=='Exif'){offset+=2+size;continue}
-        const tiff=exif+6; const little=view.getUint16(tiff,false)===0x4949; const u16=o=>view.getUint16(o,little), u32=o=>view.getUint32(o,little);
-        const first=tiff+u32(tiff+4); const out={};
-        function readAscii(base,count,valoff){let pos=count<=4?valoff:tiff+u32(valoff), s=''; for(let i=0;i<count-1 && pos+i<view.byteLength;i++) s+=String.fromCharCode(view.getUint8(pos+i)); return s;}
-        function ifd(pos){const count=u16(pos), tags={}; for(let i=0;i<count;i++){const p=pos+2+i*12; if(p+12>view.byteLength) break; tags[u16(p)]={type:u16(p+2),count:u32(p+4),valoff:p+8};} return tags;}
-        const root=ifd(first);
-        if(root[0x8769]){const exifIfd=ifd(tiff+u32(root[0x8769].valoff)); const t=exifIfd[0x9003]||exifIfd[0x0132]; if(t) out.date=readAscii(tiff,t.count,t.valoff);} else if(root[0x0132]){const t=root[0x0132]; out.date=readAscii(tiff,t.count,t.valoff)}
-        if(root[0x8825]){const gps=ifd(tiff+u32(root[0x8825].valoff)); const readRef=tag=>tag?String.fromCharCode(view.getUint8(tag.valoff)):''; const readRats=tag=>{if(!tag) return null; const pos=tiff+u32(tag.valoff), vals=[]; for(let i=0;i<tag.count;i++){const p=pos+i*8; vals.push(u32(p)/u32(p+4))} return vals;}; const lat=readRats(gps[2]), lon=readRats(gps[4]); if(lat&&lon){let la=lat[0]+lat[1]/60+lat[2]/3600, lo=lon[0]+lon[1]/60+lon[2]/3600; if(readRef(gps[1])==='S') la=-la; if(readRef(gps[3])==='W') lo=-lo; out.gps={lat:la,lon:lo};}}
-        return out;
-      }
-      offset+=2+size;
-    }
-  }catch(e){}
-  return {};
-}
-function exifStringToISO(s){if(!s) return null; const m=s.match(/(\d{4}):(\d{2}):(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/); if(!m) return null; return new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+m[6]).toISOString();}
-async function mediaFromFile(file){let meta={}; if(file.type==='image/jpeg' || /\.jpe?g$/i.test(file.name)){meta=parseExifJPEG(await arrBuffer(file));} const data=await fileToDataURL(file); return {id:uuid(),name:file.name,type:file.type||'application/octet-stream',data,takenAt:exifStringToISO(meta.date)||new Date(file.lastModified||Date.now()).toISOString(),gps:meta.gps||null};}
+captureFiles.onchange=async e=>{selectedFiles=[...e.target.files];capturePreviews.innerHTML='';let earliest=null,ex=false;for(const f of selectedFiles)if(f.type.startsWith('image/')){const img=document.createElement('img');img.src=URL.createObjectURL(f);capturePreviews.appendChild(img);let d=new Date(f.lastModified||Date.now());if(f.type==='image/jpeg'||/\.jpe?g$/i.test(f.name)){const iso=exifISO(parseExif(await f.arrayBuffer()).date);if(iso){d=new Date(iso);ex=true}}if(!earliest||d<earliest)earliest=d}if(earliest)captureDate.value=localInput(earliest);captureStatus.textContent=earliest?`Date set from ${ex?'photo metadata':'file date'}: ${fmt(earliest)}`:''};
+function clearCapture(){captureText.value=captureTitle.value=captureLocation.value=captureTags.value=captureSourceUrl.value='';captureDate.value=localInput();captureFiles.value='';capturePreviews.innerHTML='';selectedFiles=[]}clearCaptureBtn=clearCapture;document.getElementById('clearCapture').onclick=clearCapture;
+saveEntry.onclick=async()=>{if(!captureText.value.trim()&&!captureTitle.value.trim()&&!captureSourceUrl.value.trim()&&!selectedFiles.length){captureStatus.textContent='Add text, a link, or a file first.';return}captureStatus.textContent='Saving…';const media=[];for(const f of selectedFiles)media.push(await mediaFile(f));const e={id:id(),title:captureTitle.value.trim(),text:captureText.value.trim(),date:new Date(captureDate.value||Date.now()).toISOString(),location:captureLocation.value.trim(),tags:captureTags.value.split(',').map(x=>x.trim()).filter(Boolean),sourceUrl:captureSourceUrl.value.trim(),media,createdAt:new Date().toISOString(),source:'manual'};await putEntry(e);entries.push(e);clearCapture();await refresh();captureStatus.textContent='Saved.'};
+window.openEdit=idv=>{const e=entries.find(x=>x.id===idv);if(!e)return;editId=idv;editTitle.value=e.title||'';editText.value=e.text||'';editLocation.value=e.location||'';editTags.value=(e.tags||[]).join(', ');editSource.value=e.sourceUrl||'';editDate.value=localInput(new Date(e.date));editDialog.showModal()};cancelEdit.onclick=()=>editDialog.close();saveEdit.onclick=async()=>{const e=entries.find(x=>x.id===editId);if(!e)return;e.title=editTitle.value.trim();e.text=editText.value;e.location=editLocation.value.trim();e.tags=editTags.value.split(',').map(x=>x.trim()).filter(Boolean);e.sourceUrl=editSource.value.trim();e.date=new Date(editDate.value||Date.now()).toISOString();await putEntry(e);editDialog.close();await refresh()};deleteEntry.onclick=async()=>{if(!confirm('Delete this entry?'))return;await removeEntry(editId);entries=entries.filter(e=>e.id!==editId);editDialog.close();await refresh()};
 
-function suggestedGroups(){
-  const sorted=[...entries].sort((a,b)=>new Date(a.date)-new Date(b.date)); const groups=[];
-  for(const e of sorted){
-    const loc=normalizeLoc(e.location), dt=safeDate(e.date); let best=null;
-    for(const g of groups){const gap=Math.abs(dt-new Date(g.lastDate))/86400000; if(loc && g.loc===loc && gap<=21){best=g;break} if(!loc && !g.loc && gap<=1.5){best=g;break}}
-    if(!best){best={id:uuid(),loc,location:e.location||'',entries:[],firstDate:e.date,lastDate:e.date}; groups.push(best)}
-    best.entries.push(e); if(new Date(e.date)<new Date(best.firstDate)) best.firstDate=e.date; if(new Date(e.date)>new Date(best.lastDate)) best.lastDate=e.date; if(!best.location && e.location) best.location=e.location;
-  }
-  return groups.map(g=>{const titles=g.entries.map(e=>e.title).filter(Boolean); const first=safeDate(g.firstDate), last=safeDate(g.lastDate); const sameDay=first.toDateString()===last.toDateString(); return {...g,title:g.location || titles[0] || first.toLocaleDateString([],{month:'long',day:'numeric',year:'numeric'}),dateLabel:sameDay?first.toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'}):`${first.toLocaleDateString([],{month:'short',day:'numeric'})} – ${last.toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'})}`};}).sort((a,b)=>new Date(b.firstDate)-new Date(a.firstDate));
-}
-function currentGroup(){const gs=suggestedGroups(), idx=+document.getElementById('scrapEvent').value||0; return gs[idx]||null}
-function currentTemplate(){return document.getElementById('scrapTemplate').value || 'freeform'}
-function pagePrefix(){const g=currentGroup(); return (g?g.id:'global')+'::'+currentTemplate()}
-function draftVal(key, fallback=''){return key in scrapDrafts ? scrapDrafts[key] : fallback}
-function setDraft(key,val){scrapDrafts[key]=val; setSetting('scrapDrafts', scrapDrafts)}
-function photoBox(media, cls='', label='Photo'){return media?`<div class="photo-box ${cls}"><img src="${media.data}"></div>`:`<div class="photo-box ${cls}">${label}</div>`}
-function eventPhotos(g, limit=12){return g?g.entries.flatMap(e=>e.media||[]).filter(m=>m.type.startsWith('image/')).slice(0,limit):[]}
-function eventText(g){return g?g.entries.map(e=>e.text||'').filter(Boolean).join('\n\n').slice(0,3000):''}
-function shortText(txt,n=180){return (txt||'').trim().slice(0,n)}
+function platform(url=''){const u=url.toLowerCase();return u.includes('instagram.com')?'instagram':u.includes('facebook.com')||u.includes('fb.watch')?'facebook':u.includes('threads.com')||u.includes('threads.net')?'threads':'social'}
+function oembed(url){const p=platform(url),q=encodeURIComponent(url);return p==='instagram'?`https://graph.facebook.com/v26.0/instagram_oembed?url=${q}&omitscript=true`:p==='facebook'?`https://graph.facebook.com/v26.0/oembed_post?url=${q}&omitscript=true`:p==='threads'?`https://graph.threads.com/v1.0/oembed?url=${q}`:null}
+async function previewMeta(url){const ep=oembed(url);if(!ep)return{url,platform:platform(url)};const r=await fetch(ep);if(!r.ok)throw new Error(`Meta preview returned ${r.status}`);return{...await r.json(),url,platform:platform(url)}}
+function embedText(o){const d=document.createElement('div');d.innerHTML=o?.html||'';return(d.textContent||'').replace(/\s+/g,' ').trim().slice(0,700)}
+function parseManual(s=''){const out=[];let last=null;s.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).forEach((line,i)=>{const reply=line.startsWith('>');if(reply)line=line.replace(/^>+\s*/,'');const m=line.match(/^([^:]{1,80}):\s*(.+)$/),c={id:'manual'+i,name:m?m[1].trim():'Comment',text:m?m[2].trim():line,timestamp:null,replies:[]};if(reply&&last)last.replies.push(c);else{out.push(c);last=c}});return out}
+async function graphComments(objectId,token,p){const bases=p==='threads'?['https://graph.threads.com/v1.0']:['https://graph.facebook.com/v26.0','https://graph.instagram.com/v26.0'];let err;for(const b of bases)try{let url=`${b}/${encodeURIComponent(objectId)}/comments?limit=100&fields=id,message,text,created_time,timestamp,username,from,replies.limit(100){id,message,text,created_time,timestamp,username,from}&access_token=${encodeURIComponent(token)}`,all=[],guard=0;while(url&&guard++<30){const r=await fetch(url),j=await r.json();if(!r.ok||j.error)throw new Error(j.error?.message||`Comments request returned ${r.status}`);for(const x of j.data||[])all.push({id:x.id||id(),name:x.username||x.from?.name||'Comment',text:x.message||x.text||'',timestamp:x.created_time||x.timestamp||null,replies:(x.replies?.data||[]).map(y=>({id:y.id||id(),name:y.username||y.from?.name||'Reply',text:y.message||y.text||'',timestamp:y.created_time||y.timestamp||null,replies:[]}))});url=j.paging?.next||null}return all}catch(e){err=e}throw err||new Error('Unable to retrieve comments')}
+function previewSocialBox(o,cs=[]){const caption=socialCaption.value.trim()||o?.title||o?.author_name||embedText(o);return`<div class="row" style="justify-content:space-between"><div><span class="pill">${esc(o?.platform||platform(socialUrl.value))}</span> <b>${esc(o?.author_name||o?.provider_name||'Public post')}</b></div><a class="small" target="_blank" rel="noopener" href="${esc(o?.url||socialUrl.value)}">Open original</a></div>${caption?`<div style="margin:10px 0;white-space:pre-wrap">${esc(caption)}</div>`:''}${o?.html?`<details><summary>Show Meta embed</summary><div style="margin-top:8px;overflow:auto">${o.html}</div></details>`:''}${cs.length?`<div class="comments">${flatComments(cs).slice(0,50).map(c=>`<div class="comment ${c.depth?'reply':''}"><div class="commentmeta">${esc(c.name)}</div>${esc(c.text)}</div>`).join('')}</div>`:''}`}
+previewSocial.onclick=async()=>{const url=socialUrl.value.trim();if(!url){socialStatus.textContent='Paste a URL first.';return}socialStatus.textContent='Loading preview…';try{lastSocialPreview=await previewMeta(url);if(!socialCaption.value.trim())socialCaption.value=lastSocialPreview.title||lastSocialPreview.author_name||embedText(lastSocialPreview);socialPreview.innerHTML=previewSocialBox(lastSocialPreview);socialStatus.textContent='Preview loaded.'}catch(e){lastSocialPreview={url,platform:platform(url)};socialPreview.innerHTML=`<div class="notice">The URL can still be saved, but this browser could not fetch Meta's public preview.</div><a target="_blank" rel="noopener" href="${esc(url)}">Open original post</a>`;socialStatus.textContent=e.message+' — you can still import the link.'}};
+importSocial.onclick=async()=>{const url=socialUrl.value.trim();if(!url){socialStatus.textContent='Paste a social post URL first.';return}socialStatus.textContent='Importing…';let o=lastSocialPreview?.url===url?lastSocialPreview:null;if(!o)try{o=await previewMeta(url)}catch(e){o={url,platform:platform(url)}}let cs=[],complete=false;if(socialComments.checked){const oid=socialObjectId.value.trim(),tok=socialToken.value.trim();if(oid&&tok)try{cs=await graphComments(oid,tok,platform(url));complete=true}catch(e){socialStatus.textContent='Comments API failed; saving the post anyway: '+e.message}if(manualComments.value.trim())cs.push(...parseManual(manualComments.value));if(!socialReplies.checked)cs.forEach(c=>c.replies=[])}const cap=socialCaption.value.trim()||o?.title||o?.author_name||embedText(o);const social={platform:platform(url),url,author:o?.author_name||o?.provider_name||'',caption:cap,embedHtml:socialSnapshot.checked?(o?.html||''):'',comments:cs,commentsComplete:complete,importedAt:new Date().toISOString()};if(!socialNames.checked)flatComments(cs).forEach(c=>c.name='Comment');if(!socialTimes.checked)flatComments(cs).forEach(c=>c.timestamp=null);const e={id:id(),title:`${social.platform[0].toUpperCase()+social.platform.slice(1)} post${cap?' — '+cap.slice(0,65):''}`,text:cap,date:new Date(socialDate.value||Date.now()).toISOString(),location:socialLocation.value.trim(),tags:['social import',social.platform],sourceUrl:url,media:[],social,createdAt:new Date().toISOString(),source:'social-import'};await putEntry(e);entries.push(e);socialToken.value='';await refresh();socialPreview.innerHTML=previewSocialBox(o,cs);socialStatus.textContent=`Saved with ${flatComments(cs).length} comment/repl${flatComments(cs).length===1?'y':'ies'}. ${complete?'Authorized comment import completed.':'Comments may be incomplete unless you pasted them or your authorized API call returned them.'}`};
 
-function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id)); document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id)); if(id==='inboxView') renderEntries(); if(id==='eventsView') renderEvents(); if(id==='scrapView') renderScrapPanel(); if(id==='socialView') document.getElementById('socialDate').value ||= nowLocalInput();}
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view)); document.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>showView(b.dataset.jump));
-function updateStats(){document.getElementById('statEntries').textContent=entries.length; document.getElementById('statPhotos').textContent=mediaCount(); document.getElementById('statEvents').textContent=suggestedGroups().length;}
-function renderMedia(media){const imgs=media.filter(m=>m.type.startsWith('image/')); if(!imgs.length) return media.length?`<div class="small" style="margin-top:8px">${media.length} attachment(s)</div>`:''; return `<div class="entry-media">${imgs.map(m=>`<img src="${m.data}" title="${esc(m.name)}">`).join('')}</div>`}
-
-function renderSocialEntry(soc){
-  const cs=flattenComments(soc.comments||[]);
-  return `<div class="social-entry-card"><div class="social-preview-head"><div><span class="platform-pill">${esc(soc.platform||'social')}</span><div style="font-weight:800;margin-top:5px">${esc(soc.author||'Public post')}</div></div>${soc.url?`<a href="${esc(soc.url)}" target="_blank" rel="noopener" class="small">Open original</a>`:''}</div>${soc.thumbnail?`<img src="${soc.thumbnail}" style="width:100%;max-height:280px;object-fit:cover;border-radius:10px">`:''}${soc.caption?`<blockquote>${esc(soc.caption)}</blockquote>`:''}<details ${cs.length&&cs.length<12?'open':''}><summary>${cs.length} saved comment${cs.length===1?'':'s'}${soc.commentsComplete===false?' · may be incomplete':''}</summary><div class="comment-thread">${cs.slice(0,80).map(c=>`<div class="comment-item ${c.depth?'reply':''}"><div class="comment-meta">${esc(c.name||'Comment')}${c.timestamp?' · '+esc(formatDate(c.timestamp)):''}</div><div class="comment-text">${esc(c.text||'')}</div></div>`).join('')}${cs.length>80?`<div class="small">${cs.length-80} more comments saved in the entry.</div>`:''}</div></details></div>`;
-}
-
-function renderEntries(){const q=document.getElementById('searchBox').value.toLowerCase().trim(); const sort=document.getElementById('sortBox').value; let list=entries.filter(e=>{const hay=[e.title,e.text,e.location,(e.tags||[]).join(' ')].join(' ').toLowerCase(); return !q||hay.includes(q)}).sort((a,b)=>(new Date(b.date)-new Date(a.date))*(sort==='new'?1:-1)); const box=document.getElementById('entryList'); if(!list.length){box.innerHTML='<div class="empty">Nothing here yet.</div>'; return} box.innerHTML=list.map(e=>`<article class="entry"><div class="entry-head"><div><div class="entry-title">${esc(e.title||'Untitled memory')}</div><div class="small">${formatDate(e.date)}${e.location?' · '+esc(e.location):''}</div></div><button class="ghost" onclick="openEdit('${e.id}')">Edit</button></div>${e.text?`<div style="margin-top:8px;white-space:pre-wrap">${esc(e.text)}</div>`:''}${(e.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}${e.social?renderSocialEntry(e.social):''}${renderMedia(e.media||[])}</article>`).join('');}
-function renderEvents(){const groups=suggestedGroups(), box=document.getElementById('eventGrid'); if(!groups.length){box.innerHTML='<div class="empty">Add a few memories or photos and events will appear here.</div>'; return} box.innerHTML=groups.map((g,idx)=>{const imgs=eventPhotos(g,4); return `<article class="event-card"><div class="event-cover">${imgs.length?imgs.map(m=>`<img src="${m.data}">`).join(''):'<div style="grid-column:1/-1;display:grid;place-items:center" class="muted">No photos yet</div>'}</div><div class="event-body"><h3>${esc(g.title)}</h3><div class="event-meta">${esc(g.dateLabel)} · ${g.entries.length} entr${g.entries.length===1?'y':'ies'} · ${g.entries.reduce((n,e)=>n+(e.media?.length||0),0)} files</div><button class="primary" onclick="openEventInScrap(${idx})">Make scrapbook page</button></div></article>`;}).join('');}
-window.openEventInScrap=function(idx){showView('scrapView'); const sel=document.getElementById('scrapEvent'); sel.value=String(idx); renderScrapPanel();}
-
-function renderTemplateFilters(){const cats=['All',...categoryOrder]; const box=document.getElementById('templateFilters'); box.innerHTML=cats.map(c=>`<button class="filter-chip ${c===templateFilter?'active':''}" data-filter="${esc(c)}">${esc(c)}</button>`).join(''); box.querySelectorAll('[data-filter]').forEach(btn=>btn.onclick=()=>{templateFilter=btn.dataset.filter; renderTemplateFilters(); renderTemplateGallery();});}
-function renderTemplateGallery(){
-  const box=document.getElementById('templateGallery'), cur=currentTemplate();
-  const selected=document.getElementById('scrapActivity')?.value||'all';
-  const defs=selected==='all'?templateDefs:templateDefs.filter(t=>t.category===selected);
-  const cats=[...new Set(defs.map(t=>t.category))];
-  box.innerHTML=cats.map(cat=>`<div class="activity-section"><div class="activity-heading">${esc(cat)} <span class="activity-badge">${defs.filter(t=>t.category===cat).length}</span></div>${defs.filter(t=>t.category===cat).map(t=>`<div class="template-card ${t.id===cur?'active':''}" data-template-card="${t.id}"><div class="template-thumb ${t.thumb}"></div><div><div class="template-name">${esc(t.name)}</div><div class="template-desc">${esc(t.desc)}</div></div></div>`).join('')}</div>`).join('');
-  box.querySelectorAll('[data-template-card]').forEach(el=>el.onclick=()=>{document.getElementById('scrapTemplate').value=el.dataset.templateCard; renderScrapPanel();});
-}
-function renderScrapSelectors(){
-  const groups=suggestedGroups(), eventSel=document.getElementById('scrapEvent'), tempSel=document.getElementById('scrapTemplate'), actSel=document.getElementById('scrapActivity');
-  const prevE=eventSel.value, prevT=tempSel.value||'freeform', prevA=actSel.value||'all';
-  eventSel.innerHTML=groups.length?groups.map((g,i)=>`<option value="${i}">${esc(g.title)} — ${esc(g.dateLabel)}</option>`).join(''):'<option value="0">No events yet</option>';
-  const cats=[...new Set(templateDefs.map(t=>t.category))];
-  actSel.innerHTML='<option value="all">All activities</option>'+cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
-  if([...actSel.options].some(o=>o.value===prevA)) actSel.value=prevA;
-  const filtered=actSel.value==='all'?templateDefs:templateDefs.filter(t=>t.category===actSel.value);
-  tempSel.innerHTML=[...new Set(filtered.map(t=>t.category))].map(c=>`<optgroup label="${esc(c)}">${filtered.filter(t=>t.category===c).map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('')}</optgroup>`).join('');
-  if([...eventSel.options].some(o=>o.value===prevE)) eventSel.value=prevE;
-  if([...tempSel.options].some(o=>o.value===prevT)) tempSel.value=prevT;
-  else if(tempSel.options.length) tempSel.selectedIndex=0;
-  document.getElementById('scrapScheme').value=scrapScheme;
-}
-function renderScrapPanel(){renderScrapSelectors(); renderTemplateFilters(); renderTemplateGallery(); const box=document.getElementById('pageStack'); if(!currentGroup()){box.innerHTML='<div class="empty">Create an event first.</div>'; return} box.innerHTML=renderTemplatePages(); bindDraftFields();}
-
-document.getElementById('scrapEvent').onchange=renderScrapPanel; document.getElementById('scrapTemplate').onchange=renderScrapPanel; document.getElementById('scrapActivity').onchange=renderScrapPanel; document.getElementById('scrapScheme').onchange=async e=>{scrapScheme=e.target.value; await setSetting('scrapScheme',scrapScheme); renderScrapPanel();};
-document.getElementById('addDecoration').onclick=()=>{const page=document.querySelector('#pageStack .letter-page'); if(!page) return; const choices=['★','✦','♥','✈','☀','✿','📍']; const s=document.createElement('div'); s.className='paper-accent star'; s.style.left=(15+Math.random()*70)+'%'; s.style.top=(10+Math.random()*80)+'%'; s.style.right='auto'; s.style.bottom='auto'; s.textContent=choices[Math.floor(Math.random()*choices.length)]; page.appendChild(s);};
-function openPrintView(){const printWin=window.open('','_blank'); if(!printWin) return alert('Pop-up blocked. Please allow pop-ups for printing.'); const style=document.querySelector('style').outerHTML; const html=`<!doctype html><html><head><meta charset="utf-8"><title>Life Scrapbook PDF</title>${style}</head><body><div id="scrapView">${document.getElementById('pageStack').outerHTML}</div><script>window.onload=()=>setTimeout(()=>window.print(),200)<\/script></body></html>`; printWin.document.write(html); printWin.document.close();}
-document.getElementById('printPage').onclick=openPrintView;
-document.getElementById('downloadPdf').onclick=()=>{const el=document.getElementById('pageStack'); if(window.html2pdf){window.html2pdf().set({filename:`life-scrapbook-${currentTemplate()}.pdf`, margin:0, image:{type:'jpeg', quality:.98}, html2canvas:{scale:2,useCORS:true}, jsPDF:{unit:'in', format:'letter', orientation:'portrait'}, pagebreak:{mode:['css','legacy']}}).from(el).save();} else {openPrintView();}};
-
-const captureFiles=document.getElementById('captureFiles');
-captureFiles.onchange=async e=>{selectedFiles=[...e.target.files]; const p=document.getElementById('capturePreviews'); p.innerHTML=''; let earliest=null, foundExif=false; for(const f of selectedFiles){if(f.type.startsWith('image/')){const url=URL.createObjectURL(f); const img=document.createElement('img'); img.src=url; p.appendChild(img); let date=new Date(f.lastModified||Date.now()); if(f.type==='image/jpeg'||/\.jpe?g$/i.test(f.name)){const meta=parseExifJPEG(await f.arrayBuffer()), iso=exifStringToISO(meta.date); if(iso){date=new Date(iso); foundExif=true}} if(!earliest||date<earliest) earliest=date;}} if(earliest) document.getElementById('captureDate').value=nowLocalInput(earliest); document.getElementById('captureStatus').textContent=earliest?`Date set from ${foundExif?'photo metadata':'file date'}: ${formatDate(earliest)}`:'';};
-function clearCapture(){['captureText','captureTitle','captureLocation','captureTags'].forEach(id=>document.getElementById(id).value=''); document.getElementById('captureDate').value=nowLocalInput(); document.getElementById('captureFiles').value=''; document.getElementById('capturePreviews').innerHTML=''; selectedFiles=[];}
-document.getElementById('clearCapture').onclick=clearCapture;
-document.getElementById('saveEntry').onclick=async()=>{const text=document.getElementById('captureText').value.trim(); const title=document.getElementById('captureTitle').value.trim(); if(!text&&!title&&!selectedFiles.length){document.getElementById('captureStatus').textContent='Add some text or a file first.'; return} document.getElementById('captureStatus').textContent='Saving...'; const media=[]; for(const f of selectedFiles) media.push(await mediaFromFile(f)); let date=document.getElementById('captureDate').value; if(!date && media.length) date=media.map(m=>new Date(m.takenAt)).sort((a,b)=>a-b)[0]; const e={id:uuid(),title,text,date:new Date(date||Date.now()).toISOString(),location:document.getElementById('captureLocation').value.trim(),tags:document.getElementById('captureTags').value.split(',').map(s=>s.trim()).filter(Boolean),media,createdAt:new Date().toISOString(),source:'manual'}; await putEntry(e); entries.push(e); clearCapture(); await refresh(); document.getElementById('captureStatus').textContent='Saved.';};
-
-document.getElementById('searchBox').oninput=renderEntries; document.getElementById('sortBox').onchange=renderEntries; document.getElementById('refreshEvents').onclick=renderEvents;
-window.openEdit=function(id){const e=entries.find(x=>x.id===id); if(!e) return; currentEditId=id; document.getElementById('editTitle').value=e.title||''; document.getElementById('editText').value=e.text||''; document.getElementById('editLocation').value=e.location||''; document.getElementById('editTags').value=(e.tags||[]).join(', '); document.getElementById('editDate').value=nowLocalInput(new Date(e.date)); document.getElementById('editDialog').showModal();}
-document.getElementById('cancelEdit').onclick=()=>document.getElementById('editDialog').close();
-document.getElementById('saveEdit').onclick=async()=>{const e=entries.find(x=>x.id===currentEditId); if(!e) return; e.title=document.getElementById('editTitle').value.trim(); e.text=document.getElementById('editText').value; e.location=document.getElementById('editLocation').value.trim(); e.tags=document.getElementById('editTags').value.split(',').map(s=>s.trim()).filter(Boolean); e.date=new Date(document.getElementById('editDate').value||Date.now()).toISOString(); await putEntry(e); document.getElementById('editDialog').close(); await refresh();}
-document.getElementById('deleteEntry').onclick=async()=>{if(!currentEditId||!confirm('Delete this entry?')) return; await delEntry(currentEditId); entries=entries.filter(e=>e.id!==currentEditId); document.getElementById('editDialog').close(); await refresh();}
-
-async function importBlog(url){const base=url.replace(/\/+$/,''); let page=1,total=0; while(page<=20){const endpoint=`${base}/wp-json/wp/v2/posts?per_page=100&page=${page}&_fields=id,date,link,title,content`; const r=await fetch(endpoint); if(!r.ok){if(r.status===400&&page>1) break; throw new Error(`Blog import returned ${r.status}. If the site blocks direct import, use a WordPress XML export instead.`)} const posts=await r.json(); if(!posts.length) break; for(const p of posts){const e={id:uuid(),title:stripHtml(p.title?.rendered||''),text:stripHtml(p.content?.rendered||''),date:new Date(p.date).toISOString(),location:'',tags:['blog import'],media:[],createdAt:new Date().toISOString(),source:'wordpress',sourceUrl:p.link||''}; await putEntry(e); entries.push(e); total++;} if(posts.length<100) break; page++;} return total;}
-document.getElementById('importBlogUrl').onclick=async()=>{const url=document.getElementById('blogUrl').value.trim(), s=document.getElementById('blogStatus'); if(!url){s.textContent='Paste a blog URL first.'; return} s.textContent='Importing...'; try{const n=await importBlog(url); s.textContent=`Imported ${n} blog post(s).`; await refresh()} catch(e){s.textContent=e.message}};
-function xmlItems(text){const xml=new DOMParser().parseFromString(text,'text/xml'); const items=[...xml.querySelectorAll('item')], out=[]; for(const item of items){const postType=[...item.children].find(n=>n.localName==='post_type')?.textContent; if(postType&&postType!=='post') continue; const title=item.querySelector('title')?.textContent||''; const pub=item.querySelector('pubDate')?.textContent||new Date().toISOString(); const content=[...item.children].find(n=>n.localName==='encoded')?.textContent||item.querySelector('description')?.textContent||''; out.push({title,text:stripHtml(content),date:new Date(pub).toISOString(),location:'',tags:['blog import'],media:[],source:'wordpress-export'});} return out;}
-document.getElementById('importSelectedFile').onclick=async()=>{const f=document.getElementById('importFile').files[0]; if(!f) return alert('Choose a file first.'); const text=await f.text(); let imported=[]; try{if(/\.json$/i.test(f.name)){const j=JSON.parse(text); imported=Array.isArray(j)?j:(j.entries||[])} else if(/\.xml$/i.test(f.name)){imported=xmlItems(text)} else imported=[{title:f.name.replace(/\.[^.]+$/,''),text:stripHtml(text),date:new Date(f.lastModified||Date.now()).toISOString(),location:'',tags:['import'],media:[],source:'file-import'}]; for(const raw of imported){const e={id:raw.id||uuid(),title:raw.title||'',text:raw.text||'',date:raw.date||new Date().toISOString(),location:raw.location||'',tags:raw.tags||[],media:raw.media||[],createdAt:raw.createdAt||new Date().toISOString(),source:raw.source||'import'}; await putEntry(e);} entries=await getAllEntries(); await refresh(); alert(`Imported ${imported.length} item(s).`);} catch(e){alert('Could not import that file: '+e.message)}};
-document.getElementById('exportBackup').onclick=()=>{const blob=new Blob([JSON.stringify({version:3,exportedAt:new Date().toISOString(),entries,scrapDrafts},null,2)],{type:'application/json'}); downloadBlob(blob,`life-scrapbook-backup-${new Date().toISOString().slice(0,10)}.json`);};
-document.getElementById('exportText').onclick=()=>{const groups=suggestedGroups(); const body=groups.map(g=>`<section><h1>${esc(g.title)}</h1><p><em>${esc(g.dateLabel)}</em></p>${g.entries.map(e=>`<article><h2>${esc(e.title||'Memory')}</h2><p>${esc(e.text||'').replace(/\n/g,'<br>')}</p>${(e.media||[]).filter(m=>m.type.startsWith('image/')).map(m=>`<img src="${m.data}" style="max-width:500px">`).join('')}</article>`).join('')}</section>`).join('<hr>'); const blob=new Blob([`<!doctype html><meta charset="utf-8"><title>Life Scrapbook Export</title><style>body{font-family:Georgia,serif;max-width:800px;margin:auto;padding:30px}img{display:block;margin:12px 0}</style>${body}`],{type:'text/html'}); downloadBlob(blob,'life-scrapbook-readable.html');};
-function downloadBlob(blob,name){const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-document.getElementById('wipeAll').onclick=async()=>{if(!confirm('Erase every local entry from this browser? Export a backup first if you want to keep it.')) return; await clearEntries(); entries=[]; scrapDrafts={}; await setSetting('scrapDrafts',{}); await refresh();}
-
-async function refresh(){entries=await getAllEntries(); updateStats(); renderEntries(); renderEvents(); if(document.getElementById('scrapView').classList.contains('active')) renderScrapPanel();}
-(async()=>{await openDB(); entries=await getAllEntries(); scrapDrafts=(await getSetting('scrapDrafts'))||{}; scrapScheme=(await getSetting('scrapScheme'))||'classic'; document.getElementById('captureDate').value=nowLocalInput(); document.getElementById('socialDate').value=nowLocalInput(); updateStats(); renderEntries(); renderEvents(); renderScrapSelectors(); renderTemplateFilters(); renderTemplateGallery();})();
+async function importWP(url){let n=0,page=1,base=url.replace(/\/+$/,'');while(page<=20){const r=await fetch(`${base}/wp-json/wp/v2/posts?per_page=100&page=${page}&_fields=id,date,link,title,content`);if(!r.ok){if(page>1&&r.status===400)break;throw new Error(`Blog returned ${r.status}`)}const ps=await r.json();if(!ps.length)break;for(const p of ps){const e={id:id(),title:stripHtml(p.title?.rendered||''),text:stripHtml(p.content?.rendered||''),date:new Date(p.date).toISOString(),location:'',tags:['blog import'],sourceUrl:p.link||'',media:[],createdAt:new Date().toISOString(),source:'wordpress'};await putEntry(e);n++}if(ps.length<100)break;page++}return n}
+importBlog.onclick=async()=>{if(!blogUrl.value.trim()){blogStatus.textContent='Paste a blog URL first.';return}blogStatus.textContent='Importing…';try{const n=await importWP(blogUrl.value.trim());blogStatus.textContent=`Imported ${n} post(s).`;await refresh()}catch(e){blogStatus.textContent=e.message+' Try a WordPress XML export instead.'}};
+function xmlPosts(s){const x=new DOMParser().parseFromString(s,'text/xml'),out=[];for(const item of x.querySelectorAll('item')){const type=[...item.children].find(n=>n.localName==='post_type')?.textContent;if(type&&type!=='post')continue;const content=[...item.children].find(n=>n.localName==='encoded')?.textContent||item.querySelector('description')?.textContent||'';out.push({title:item.querySelector('title')?.textContent||'',text:stripHtml(content),date:new Date(item.querySelector('pubDate')?.textContent||Date.now()).toISOString(),location:'',tags:['blog import'],media:[],source:'wordpress-export'})}return out}
+importSelected.onclick=async()=>{const f=importFile.files[0];if(!f)return alert('Choose a file first.');const s=await f.text();try{let a;if(/\.json$/i.test(f.name)){const j=JSON.parse(s);a=Array.isArray(j)?j:j.entries||[]}else if(/\.xml$/i.test(f.name))a=xmlPosts(s);else a=[{title:f.name.replace(/\.[^.]+$/,''),text:stripHtml(s),date:new Date(f.lastModified||Date.now()).toISOString(),location:'',tags:['import'],media:[],source:'file-import'}];for(const r of a)await putEntry({id:r.id||id(),title:r.title||'',text:r.text||'',date:r.date||new Date().toISOString(),location:r.location||'',tags:r.tags||[],sourceUrl:r.sourceUrl||'',media:r.media||[],social:r.social,createdAt:r.createdAt||new Date().toISOString(),source:r.source||'import'});await refresh();alert(`Imported ${a.length} item(s).`)}catch(e){alert('Could not import: '+e.message)}};
+function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}exportBackup.onclick=()=>dl(new Blob([JSON.stringify({version:4,exportedAt:new Date().toISOString(),entries,drafts,scheme},null,2)],{type:'application/json'}),`life-scrapbook-backup-${new Date().toISOString().slice(0,10)}.json`);exportHtml.onclick=()=>{const body=groups().map(g=>`<h1>${esc(g.title)}</h1><p>${esc(g.dateLabel)}</p>${g.items.map(e=>`<h2>${esc(e.title||'Memory')}</h2><p>${esc(e.text||'').replace(/\n/g,'<br>')}</p>`).join('')}`).join('<hr>');dl(new Blob([`<!doctype html><meta charset="utf-8"><style>body{max-width:800px;margin:auto;font-family:Georgia,serif;padding:30px}</style>${body}`],{type:'text/html'}),'life-scrapbook-readable.html')};wipeAll.onclick=async()=>{if(!confirm('Erase every local entry from this browser?'))return;await clearEntries();entries=[];drafts={};await setSetting('drafts',{});await refresh()};
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;installApp.classList.remove('hidden')});installApp.onclick=async()=>{if(!deferredInstall)return;deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;installApp.classList.add('hidden')};if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+function applyShare(){const p=new URLSearchParams(location.search),t=p.get('text')||'',u=p.get('url')||'',title=p.get('title')||'';if(t||u||title){captureText.value=t;captureTitle.value=title;captureSourceUrl.value=u||((t.match(/https?:\/\/\S+/)||[])[0]||'');history.replaceState({},'',location.pathname)}}
+async function refresh(){entries=await getEntries();updateStats();renderInbox();renderEvents();if(scrapView.classList.contains('active'))renderScrap()}
+(async()=>{await openDB();entries=await getEntries();drafts=(await getSetting('drafts'))||{};scheme=(await getSetting('scheme'))||'classic';captureDate.value=localInput();socialDate.value=localInput();updateStats();renderInbox();renderEvents();renderSelectors();renderGallery();applyShare();window.__APP_READY__=true})();
 </script>
-</body>
-</html>
+</body></html>
