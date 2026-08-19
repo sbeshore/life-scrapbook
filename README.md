@@ -1,15 +1,35 @@
-# Life Scrapbook — GitHub Pages package
+# Life Scrapbook — Cloud Sync edition
 
-## Upload
-1. Extract `life-scrapbook-github-ready.zip`.
-2. In GitHub, open the `life-scrapbook` repository and choose **Add file → Upload files**.
-3. Drag in the **extracted files**. Do not upload the ZIP as one file; GitHub Pages does not unpack it.
-4. Commit to `main`.
-5. Go to **Settings → Pages → Build and deployment → Deploy from a branch**. Choose `main` and `/ (root)`, then Save.
-6. Once the GitHub Pages URL works, set the custom domain to `journal.summerbeshore.com`.
+This version is ready for GitHub Pages / `journal.summerbeshore.com` and adds optional private cloud sync through Supabase.
 
-## Important
-- Source code can be public; journal entries/photos are stored in browser IndexedDB and are not committed to GitHub.
-- Do **not** upload exported scrapbook backup JSON files to the public repository.
-- Use **Export Backup** regularly until cloud sync is added.
-- Direct PDF download uses the html2pdf.js CDN. **Print / Save PDF** remains the fallback.
+## GitHub update
+Upload these files to the **main** branch at the repository root. Existing files with the same names should be replaced/updated:
+- `index.html`
+- `manifest.webmanifest`
+- `sw.js`
+- `icon-192.png`
+- `icon-512.png`
+- `README.md`
+- `supabase-setup.sql`
+
+GitHub Pages remains: **main** + **/(root)**.
+
+## Free cloud sync setup
+1. Create a free Supabase project.
+2. In Supabase, open **SQL Editor**, paste `supabase-setup.sql`, and run it once.
+3. In Supabase project settings/API, copy the **Project URL** and **anon/public/publishable key**. Never use the `service_role` key in the browser app.
+4. Open Life Scrapbook -> **Cloud Sync** and paste the URL + public key.
+5. Create an account/sign in inside Life Scrapbook.
+6. Press **Sync now**.
+
+## Storage model
+- Browser IndexedDB remains the local/offline copy.
+- Text, metadata, social comments and layout data sync through private Postgres rows protected by Row Level Security.
+- Media files sync through a private `scrapbook-media` Storage bucket.
+- Deletions are stored as tombstones so an older device should not recreate deleted entries.
+
+## Privacy
+The GitHub source code is public, but scrapbook content is not written to the GitHub repository. The Supabase SQL enables Row Level Security so an authenticated user can only access rows/files under their own user ID.
+
+## Backups
+Cloud sync is not a substitute for backups. Use **Import / Backup -> Export backup** periodically.
